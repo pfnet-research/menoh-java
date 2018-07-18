@@ -1,0 +1,59 @@
+package jp.preferred.menoh;
+
+import static jp.preferred.menoh.MenohException.checkError;
+
+import com.sun.jna.Pointer;
+import com.sun.jna.ptr.IntByReference;
+import com.sun.jna.ptr.PointerByReference;
+
+/**
+ * It is created by {@link ModelBuilder}.
+ */
+public class Model implements AutoCloseable {
+    private Pointer handle;
+
+    /**
+     * @param handle a pointer to a native <code>menoh_model</code>
+     */
+    Model(Pointer handle) {
+        this.handle = handle;
+    }
+
+    @Override
+    public void close() {
+        synchronized (this) {
+            if (handle != Pointer.NULL) {
+                MenohNative.INSTANCE.menoh_delete_model(handle);
+                handle = Pointer.NULL;
+            }
+        }
+    }
+
+    public Variable getVariable(String name) throws MenohException {
+        IntByReference dtype = new IntByReference();
+
+        checkError(MenohNative.INSTANCE.menoh_model_get_variable_dtype(handle, name, dtype));
+
+        IntByReference dimsSize = new IntByReference();
+        checkError(MenohNative.INSTANCE.menoh_model_get_variable_dims_size(handle, name, dimsSize));
+
+        int[] dims = new int[dimsSize.getValue()];
+
+        for (int i = 0; i < dimsSize.getValue(); ++i) {
+            IntByReference d = new IntByReference();
+            checkError(MenohNative.INSTANCE.menoh_model_get_variable_dims_at(handle, name, i, d));
+            dims[i] = d.getValue();
+        }
+
+        PointerByReference buffer = new PointerByReference();
+        checkError(MenohNative.INSTANCE.menoh_model_get_variable_buffer_handle(handle, name, buffer));
+
+        Variable ret = new Variable(DType.valueOf(dtype.getValue()), dims, buffer.getValue());
+
+        return ret;
+    }
+
+    public void run() throws MenohException {
+        checkError(MenohNative.INSTANCE.menoh_model_run(handle));
+    }
+}
