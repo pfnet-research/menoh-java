@@ -40,9 +40,9 @@ public class AppTest {
         int height = 224;
         int width = 224;
 
-        String inputImagePath = "Light_sussex_hen.jpg";
-        String onnxModelPath = "VGG16.onnx";
-        String synsetWordsPath = "synset_words.txt";
+        final String inputImagePath = getClass().getResource("/data/Light_sussex_hen.jpg").getFile();
+        final String onnxModelPath = getClass().getResource("/data/VGG16.onnx").getFile();
+        final String synsetWordsPath = getClass().getResource("/data/synset_words.txt").getFile();
 
         BufferedImage image = ImageIO.read(new File(inputImagePath));
 

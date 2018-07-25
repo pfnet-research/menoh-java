@@ -1,5 +1,7 @@
 package jp.preferred.menoh;
 
+import java.util.Locale;
+
 public class MenohException extends RuntimeException {
     private final ErrorCode errorCode;
 
@@ -45,7 +47,9 @@ public class MenohException extends RuntimeException {
             final String errorMessage = MenohNative.INSTANCE.menoh_get_last_error_message();
             try {
                 ErrorCode ec = ErrorCode.valueOf(errorCode);
-                throw new MenohException(ec, String.format("%s: %s", ec.toString().toLowerCase(), errorMessage));
+                throw new MenohException(
+                        ec,
+                        String.format("%s: %s", ec.toString().toLowerCase(Locale.ENGLISH), errorMessage));
             } catch (MenohException e) {
                 // jp.preferred.menoh.ErrorCode.valueOf() throws MenohException if the error code is
                 // undefined
