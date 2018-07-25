@@ -16,6 +16,16 @@ public enum DType {
         return id;
     }
 
+    public int size() throws MenohException {
+        switch (this) {
+            case Float:
+                return 4;
+            default:
+                throw new MenohException(
+                        ErrorCode.UNDEFINED, String.format("the size of dtype is unknown: %d", id));
+        }
+    }
+
     public static DType valueOf(int value) throws MenohException {
         if (0 <= value && value < values.length) {
             DType ret = values[value];
