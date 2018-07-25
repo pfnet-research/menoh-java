@@ -2,6 +2,8 @@ package jp.preferred.menoh;
 
 import com.sun.jna.Pointer;
 
+import java.nio.ByteBuffer;
+
 public class Variable {
     private final DType dtype;
     private final int[] dims;
@@ -13,15 +15,32 @@ public class Variable {
         this.bufferHandle = bufferHandle;
     }
 
-    DType dtype() {
+    public DType dtype() {
         return this.dtype;
     }
 
-    int[] dims() {
-        return this.dims;
+    public int[] dims() {
+        if (dims != null) {
+            return this.dims.clone();
+        } else {
+            return new int[0];
+        }
     }
 
-    Pointer bufferHandle() {
-        return this.bufferHandle;
+    public ByteBuffer buffer() throws MenohException {
+        final long offset = 0;
+        final long elementSize = dtype.size();
+
+        long length;
+        if (dims.length > 0) {
+            length = 1;
+            for (int d : dims) {
+                length *= d;
+            }
+        } else {
+            length = 0;
+        }
+
+        return this.bufferHandle.getByteBuffer(offset, elementSize * length);
     }
 }

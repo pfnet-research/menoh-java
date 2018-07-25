@@ -48,9 +48,7 @@ public class Model implements AutoCloseable {
         PointerByReference buffer = new PointerByReference();
         checkError(MenohNative.INSTANCE.menoh_model_get_variable_buffer_handle(handle, name, buffer));
 
-        Variable ret = new Variable(DType.valueOf(dtype.getValue()), dims, buffer.getValue());
-
-        return ret;
+        return new Variable(DType.valueOf(dtype.getValue()), dims, buffer.getValue());
     }
 
     public void run() throws MenohException {

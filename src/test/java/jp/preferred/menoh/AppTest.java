@@ -14,6 +14,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,27 +81,27 @@ public class AppTest {
         ) {
             modelData.close(); // you can delete modelData explicitly after model building
 
-            // Get buffer pointer of output
-            Pointer fc6OutputBuff = model.getVariable(fc6OutName).bufferHandle();
-            Pointer softmaxOutputBuff = model.getVariable(softmaxOutName).bufferHandle();
-
             // Run inference
             model.run();
 
+            // Get buffer pointer of output
+            ByteBuffer fc6OutputBuff = model.getVariable(fc6OutName).buffer();
+            ByteBuffer softmaxOutputBuff = model.getVariable(softmaxOutName).buffer();
+
             // Get output
-            for (int i = 0; i < 10; ++i) {
-                System.out.print(Float.toString(fc6OutputBuff.getFloat(i * 4)) + " ");
+            FloatBuffer fc6OutputFloatBuff = fc6OutputBuff.asFloatBuffer();
+            for (int i = 0; i < 10; i++) {
+                System.out.print(Float.toString(fc6OutputFloatBuff.get(i)) + " ");
             }
             System.out.println();
 
             String[] categories = loadCategoryList(synsetWordsPath);
             int topK = 5;
 
+            // Note: softmaxOutputBuff.array() is not available because it is a direct buffer
             int[] softmaxDims = vpt.getVariableProfile(softmaxOutName).dims();
             float[] scoreArray = new float[softmaxDims[1]];
-            for (int i = 0; i < softmaxDims[1]; ++i) {
-                scoreArray[i] = softmaxOutputBuff.getFloat(i * 4);
-            }
+            softmaxOutputBuff.asFloatBuffer().get(scoreArray);
 
             int[] topKIndexList = extractTopKIndexList(
                     scoreArray,

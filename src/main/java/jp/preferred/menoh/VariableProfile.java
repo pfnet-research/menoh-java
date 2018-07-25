@@ -9,11 +9,15 @@ public class VariableProfile {
         this.dims = dims;
     }
 
-    DType dtype() {
+    public DType dtype() {
         return this.dtype;
     }
 
-    int[] dims() {
-        return this.dims;
+    public int[] dims() {
+        if (dims != null) {
+            return this.dims.clone();
+        } else {
+            return new int[0];
+        }
     }
 }
