@@ -5,12 +5,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>jp.preferred</groupId>
-  <artifactId>menoh-api</artifactId>
+  <artifactId>menoh</artifactId>
   <version>1.0.0-SNAPSHOT</version>
 
-  <name>Menoh JVM API</name>
-  <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
+  <name>Menoh Java API</name>
+  <url>https://github.com/pfnet-research/menoh-java</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -117,6 +116,53 @@
           <xmlOutputDirectory>target/site/findbugs</xmlOutputDirectory>
           <findbugsXmlOutputDirectory>target/site/findbugs</findbugsXmlOutputDirectory>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>wagon-maven-plugin</artifactId>
+        <version>2.0.0</version>
+        <executions>
+          <execution>
+            <id>download-vgg16-onnx</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>download-single</goal>
+            </goals>
+            <configuration>
+              <url>https://www.dropbox.com</url>
+              <fromFile>s/bjfn9kehukpbmcm/VGG16.onnx?dl=1</fromFile>
+              <toFile>${project.build.testOutputDirectory}/data/VGG16.onnx</toFile>
+              <skipIfExists>true</skipIfExists>
+            </configuration>
+          </execution>
+          <execution>
+            <id>download-synset-words-txt</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>download-single</goal>
+            </goals>
+            <configuration>
+              <url>https://raw.githubusercontent.com</url>
+              <fromFile>HoldenCaulfieldRye/caffe/master/data/ilsvrc12/synset_words.txt</fromFile>
+              <toFile>${project.build.testOutputDirectory}/data/synset_words.txt</toFile>
+              <skipIfExists>true</skipIfExists>
+            </configuration>
+          </execution>
+          <execution>
+            <id>download-light-sussex-hen-jpg</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>download-single</goal>
+            </goals>
+            <configuration>
+              <url>https://upload.wikimedia.org</url>
+              <fromFile>wikipedia/commons/5/54/Light_sussex_hen.jpg</fromFile>
+              <toFile>${project.build.testOutputDirectory}/data/Light_sussex_hen.jpg</toFile>
+              <skipIfExists>true</skipIfExists>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
