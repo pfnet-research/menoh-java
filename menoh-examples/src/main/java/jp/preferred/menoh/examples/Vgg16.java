@@ -56,23 +56,23 @@ public class Vgg16 {
 
         try (
                 // Load ONNX model data
-                ModelData modelData = ModelData.makeModelDataFromOnnx(onnxModelPath);
+                ModelData modelData = ModelData.makeFromOnnx(onnxModelPath);
 
                 // Define input profile (name, dtype, dims) and output profile (name, dtype)
                 // dims of output is automatically calculated later
-                VariableProfileTableBuilder vpt_builder = makeVariableProfileTableBuilder(
+                VariableProfileTableBuilder vptBuilder = makeVariableProfileTableBuilder(
                         conv11InName, batchSize, channelNum, height, width, fc6OutName, softmaxOutName);
 
-                // Build variable_profile_table and get variable dims (if needed)
-                VariableProfileTable vpt = vpt_builder.buildVariableProfileTable(modelData);
+                // Build VariableProfileTable and get variable dims (if needed)
+                VariableProfileTable vpt = vptBuilder.build(modelData);
 
-                // Make model_builder and attach extenal memory buffer
+                // Make ModelBuilder and attach extenal memory buffer
                 // Variables which are not attached external memory buffer here are attached
                 // internal memory buffers which are automatically allocated
-                ModelBuilder model_builder = makeModelBuilder(vpt, imageData, conv11InName);
+                ModelBuilder modelBuilder = makeModelBuilder(vpt, imageData, conv11InName);
 
                 // Build model
-                Model model = model_builder.buildModel(modelData, "mkldnn", "")
+                Model model = modelBuilder.build(modelData, "mkldnn", "")
         ) {
             modelData.close(); // you can delete modelData explicitly after model building
 
@@ -168,11 +168,11 @@ public class Vgg16 {
             String fc6OutName,
             String softmaxOutName) throws MenohException {
         VariableProfileTableBuilder vptBuilder = VariableProfileTableBuilder.make();
-        vptBuilder.addInputProfile(conv11InName, DType.Float,
+        vptBuilder.addInputProfile(conv11InName, DType.FLOAT,
                 new int[]{batchSize, channelNum, height, width});
 
-        vptBuilder.addOutputProfile(fc6OutName, DType.Float);
-        vptBuilder.addOutputProfile(softmaxOutName, DType.Float);
+        vptBuilder.addOutputProfile(fc6OutName, DType.FLOAT);
+        vptBuilder.addOutputProfile(softmaxOutName, DType.FLOAT);
 
         return vptBuilder;
     }

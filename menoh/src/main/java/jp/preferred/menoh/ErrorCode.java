@@ -37,8 +37,9 @@ public enum ErrorCode {
     }
 
     public static ErrorCode valueOf(int value) throws MenohException {
-        if (0 <= value && value < values.length + 1) {
-            ErrorCode ret = values[value + 1];
+        final int index = value + 1;
+        if (1 <= index && index < values.length) {
+            final ErrorCode ret = values[index];
             assert ret.id == value;
 
             return ret;

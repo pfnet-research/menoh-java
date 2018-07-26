@@ -33,17 +33,16 @@ public class VariableProfileTable implements AutoCloseable {
     }
 
     public VariableProfile getVariableProfile(String name) throws MenohException {
-
-        IntByReference dtype = new IntByReference(0);
+        final IntByReference dtype = new IntByReference(0);
         checkError(MenohNative.INSTANCE.menoh_variable_profile_table_get_dtype(handle, name, dtype));
 
-        IntByReference dimsSize = new IntByReference();
+        final IntByReference dimsSize = new IntByReference();
         checkError(MenohNative.INSTANCE.menoh_variable_profile_table_get_dims_size(handle, name, dimsSize));
 
-        int[] dims = new int[dimsSize.getValue()];
+        final int[] dims = new int[dimsSize.getValue()];
 
         for (int i = 0; i < dimsSize.getValue(); ++i) {
-            IntByReference d = new IntByReference();
+            final IntByReference d = new IntByReference();
             checkError(MenohNative.INSTANCE.menoh_variable_profile_table_get_dims_at(handle, name, i, d));
             dims[i] = d.getValue();
         }

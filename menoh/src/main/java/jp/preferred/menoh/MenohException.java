@@ -45,16 +45,17 @@ public class MenohException extends RuntimeException {
     static void checkError(int errorCode) throws MenohException {
         if (errorCode != ErrorCode.SUCCESS.getId()) {
             final String errorMessage = MenohNative.INSTANCE.menoh_get_last_error_message();
+
+            ErrorCode ec;
             try {
-                ErrorCode ec = ErrorCode.valueOf(errorCode);
-                throw new MenohException(
-                        ec,
-                        String.format("%s: %s", ec.toString().toLowerCase(Locale.ENGLISH), errorMessage));
+                ec = ErrorCode.valueOf(errorCode);
             } catch (MenohException e) {
-                // jp.preferred.menoh.ErrorCode.valueOf() throws MenohException if the error code is
-                // undefined
-                throw new MenohException(ErrorCode.UNDEFINED, errorMessage, e);
+                // ErrorCode.valueOf() throws MenohException if the error code is undefined
+                throw new MenohException(ErrorCode.UNDEFINED, String.format("%d: %s", errorCode, errorMessage), e);
             }
+
+            final String errorCodeName = ec.toString().toLowerCase(Locale.ENGLISH);
+            throw new MenohException(ec, String.format("%s: %s", errorCodeName, errorMessage));
         }
     }
 }

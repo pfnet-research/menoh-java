@@ -33,8 +33,8 @@ public class ModelData implements AutoCloseable {
         }
     }
 
-    public static ModelData makeModelDataFromOnnx(String onnxModelPath) throws MenohException {
-        PointerByReference handle = new PointerByReference();
+    public static ModelData makeFromOnnx(String onnxModelPath) throws MenohException {
+        final PointerByReference handle = new PointerByReference();
         checkError(MenohNative.INSTANCE.menoh_make_model_data_from_onnx(onnxModelPath, handle));
 
         return new ModelData(handle.getValue());

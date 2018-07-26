@@ -23,7 +23,7 @@ public class VariableProfileTableBuilder implements AutoCloseable {
     }
 
     public static VariableProfileTableBuilder make() throws MenohException {
-        PointerByReference ref = new PointerByReference();
+        final PointerByReference ref = new PointerByReference();
         checkError(MenohNative.INSTANCE.menoh_make_variable_profile_table_builder(ref));
 
         return new VariableProfileTableBuilder(ref.getValue());
@@ -50,8 +50,8 @@ public class VariableProfileTableBuilder implements AutoCloseable {
                 handle, name, dtype.getId()));
     }
 
-    public VariableProfileTable buildVariableProfileTable(ModelData modelData) throws MenohException {
-        PointerByReference ref = new PointerByReference();
+    public VariableProfileTable build(ModelData modelData) throws MenohException {
+        final PointerByReference ref = new PointerByReference();
         checkError(MenohNative.INSTANCE.menoh_build_variable_profile_table(
                 this.handle, modelData.getNativeHandle(), ref));
 
