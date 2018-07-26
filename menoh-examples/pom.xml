@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>jp.preferred.menoh</groupId>
+  <artifactId>menoh-examples</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>Menoh Java Examples</name>
+  <url>https://github.com/pfnet-research/menoh-java</url>
+
+  <properties>
+    <menoh.version>${project.version}</menoh.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>jp.preferred.menoh</groupId>
+      <artifactId>menoh</artifactId>
+      <version>${menoh.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+      <version>4.11</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>wagon-maven-plugin</artifactId>
+        <version>2.0.0</version>
+        <executions>
+          <execution>
+            <id>download-vgg16-onnx</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>download-single</goal>
+            </goals>
+            <configuration>
+              <url>https://www.dropbox.com</url>
+              <fromFile>s/bjfn9kehukpbmcm/VGG16.onnx?dl=1</fromFile>
+              <toFile>${project.build.outputDirectory}/data/VGG16.onnx</toFile>
+              <skipIfExists>true</skipIfExists>
+            </configuration>
+          </execution>
+          <execution>
+            <id>download-synset-words-txt</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>download-single</goal>
+            </goals>
+            <configuration>
+              <url>https://raw.githubusercontent.com</url>
+              <fromFile>HoldenCaulfieldRye/caffe/master/data/ilsvrc12/synset_words.txt</fromFile>
+              <toFile>${project.build.outputDirectory}/data/synset_words.txt</toFile>
+              <skipIfExists>true</skipIfExists>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

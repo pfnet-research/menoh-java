@@ -1,9 +1,8 @@
-package jp.preferred.menoh;
-
-import static org.junit.Assert.assertTrue;
+package jp.preferred.menoh.examples;
 
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
+import jp.preferred.menoh.*;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -23,17 +22,8 @@ import java.util.Comparator;
 import java.util.List;
 import javax.imageio.ImageIO;
 
-import org.junit.Test;
-
-/**
- * Unit test for simple App.
- */
-public class AppTest {
-    /**
-     * Rigorous Test :-)
-     */
-    @Test
-    public void vgg16() throws Exception {
+public class Vgg16 {
+    public static void main(String[] args) throws Exception {
         System.out.println("Working Directory = " + System.getProperty("user.dir"));
 
         String conv11InName = "140326425860192";
@@ -45,9 +35,14 @@ public class AppTest {
         int height = 224;
         int width = 224;
 
-        final String inputImagePath = asFilePath(getClass().getResource("/data/Light_sussex_hen.jpg"));
-        final String onnxModelPath = asFilePath(getClass().getResource("/data/VGG16.onnx"));
-        final String synsetWordsPath = asFilePath(getClass().getResource("/data/synset_words.txt"));
+        if (args.length <= 0) {
+            System.err.println("You must specify a filename of the input image in the argument.");
+            System.exit(1);
+        }
+
+        final String inputImagePath = args[0];
+        final String onnxModelPath = getResourceFilePath("/data/VGG16.onnx");
+        final String synsetWordsPath = getResourceFilePath("/data/synset_words.txt");
 
         BufferedImage image = ImageIO.read(new File(inputImagePath));
 
@@ -117,8 +112,10 @@ public class AppTest {
         }
     }
 
-    private static String asFilePath(URL url) throws IOException, URISyntaxException {
+
+    private static String getResourceFilePath(String name) throws IOException, URISyntaxException {
         // ref. https://stackoverflow.com/a/17870390/1014818
+        URL url = Vgg16.class.getResource(name);
         return Paths.get(url.toURI()).toFile().getCanonicalPath();
     }
 
@@ -192,12 +189,12 @@ public class AppTest {
         return modelBuilder;
     }
 
-    class ScoreIndex {
+    static class ScoreIndex {
         float score;
         int index;
     }
 
-    private int[] extractTopKIndexList(float[] floatArray, int first, int last, int k) {
+    private static int[] extractTopKIndexList(float[] floatArray, int first, int last, int k) {
         List<ScoreIndex> q = new ArrayList<>(0);
 
         for (int i = first; i != last; i++) {
