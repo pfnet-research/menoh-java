@@ -1,7 +1,7 @@
 package jp.preferred.menoh;
 
 public enum DType {
-    Float(0);
+    FLOAT(0);
 
     private final int id;
 
@@ -18,7 +18,7 @@ public enum DType {
 
     public int size() throws MenohException {
         switch (this) {
-            case Float:
+            case FLOAT:
                 return 4;
             default:
                 throw new MenohException(

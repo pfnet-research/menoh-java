@@ -168,11 +168,11 @@ public class Vgg16 {
             String fc6OutName,
             String softmaxOutName) throws MenohException {
         VariableProfileTableBuilder vptBuilder = VariableProfileTableBuilder.make();
-        vptBuilder.addInputProfile(conv11InName, DType.Float,
+        vptBuilder.addInputProfile(conv11InName, DType.FLOAT,
                 new int[]{batchSize, channelNum, height, width});
 
-        vptBuilder.addOutputProfile(fc6OutName, DType.Float);
-        vptBuilder.addOutputProfile(softmaxOutName, DType.Float);
+        vptBuilder.addOutputProfile(fc6OutName, DType.FLOAT);
+        vptBuilder.addOutputProfile(softmaxOutName, DType.FLOAT);
 
         return vptBuilder;
     }
