@@ -18,7 +18,7 @@ public class VariableProfileTable implements AutoCloseable {
         this.handle = handle;
     }
 
-    Pointer getNativeHandle() {
+    Pointer nativeHandle() {
         return this.handle;
     }
 
@@ -32,7 +32,7 @@ public class VariableProfileTable implements AutoCloseable {
         }
     }
 
-    public VariableProfile getVariableProfile(String name) throws MenohException {
+    public VariableProfile variableProfile(String name) throws MenohException {
         final IntByReference dtype = new IntByReference(0);
         checkError(MenohNative.INSTANCE.menoh_variable_profile_table_get_dtype(handle, name, dtype));
 

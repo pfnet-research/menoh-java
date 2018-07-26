@@ -24,7 +24,7 @@ public class ModelBuilder implements AutoCloseable {
 
     public static ModelBuilder make(VariableProfileTable vpt) throws MenohException {
         final PointerByReference ref = new PointerByReference();
-        checkError(MenohNative.INSTANCE.menoh_make_model_builder(vpt.getNativeHandle(), ref));
+        checkError(MenohNative.INSTANCE.menoh_make_model_builder(vpt.nativeHandle(), ref));
 
         return new ModelBuilder(ref.getValue());
     }
@@ -37,7 +37,7 @@ public class ModelBuilder implements AutoCloseable {
             throws MenohException {
         final PointerByReference ref = new PointerByReference();
         checkError(MenohNative.INSTANCE.menoh_build_model(
-                this.handle, modelData.getNativeHandle(), backendName, backendConfig, ref));
+                this.handle, modelData.nativeHandle(), backendName, backendConfig, ref));
 
         return new Model(ref.getValue());
     }

@@ -15,12 +15,12 @@ public class ModelData implements AutoCloseable {
         this.handle = handle;
     }
 
-    Pointer getNativeHandle() {
+    Pointer nativeHandle() {
         return this.handle;
     }
 
     public void optimize(VariableProfileTable vpt) throws MenohException {
-        checkError(MenohNative.INSTANCE.menoh_model_data_optimize(handle, vpt.getNativeHandle()));
+        checkError(MenohNative.INSTANCE.menoh_model_data_optimize(handle, vpt.nativeHandle()));
     }
 
     @Override

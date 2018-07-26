@@ -29,7 +29,7 @@ public class Model implements AutoCloseable {
         }
     }
 
-    public Variable getVariable(String name) throws MenohException {
+    public Variable variable(String name) throws MenohException {
         final IntByReference dtype = new IntByReference();
 
         checkError(MenohNative.INSTANCE.menoh_model_get_variable_dtype(handle, name, dtype));
