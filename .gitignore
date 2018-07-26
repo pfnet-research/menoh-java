@@ -41,3 +41,8 @@ jrebel.lic
 *.iws
 .*.sw?
 .idea
+
+# image files
+*.bmp
+*.jpg
+*.png
