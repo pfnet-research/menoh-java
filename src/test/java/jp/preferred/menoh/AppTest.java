@@ -12,8 +12,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -42,9 +45,9 @@ public class AppTest {
         int height = 224;
         int width = 224;
 
-        String inputImagePath = "Light_sussex_hen.jpg";
-        String onnxModelPath = "VGG16.onnx";
-        String synsetWordsPath = "synset_words.txt";
+        final String inputImagePath = asFilePath(getClass().getResource("/data/Light_sussex_hen.jpg"));
+        final String onnxModelPath = asFilePath(getClass().getResource("/data/VGG16.onnx"));
+        final String synsetWordsPath = asFilePath(getClass().getResource("/data/synset_words.txt"));
 
         BufferedImage image = ImageIO.read(new File(inputImagePath));
 
@@ -112,6 +115,11 @@ public class AppTest {
                 System.out.println(ki + " " + scoreArray[ki] + "  categories are" + categories[ki]);
             }
         }
+    }
+
+    private static String asFilePath(URL url) throws IOException, URISyntaxException {
+        // ref. https://stackoverflow.com/a/17870390/1014818
+        return Paths.get(url.toURI()).toFile().getCanonicalPath();
     }
 
     private static BufferedImage resizeImage(BufferedImage image, int width, int height) {
