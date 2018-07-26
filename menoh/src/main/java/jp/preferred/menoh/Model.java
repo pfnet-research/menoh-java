@@ -30,22 +30,22 @@ public class Model implements AutoCloseable {
     }
 
     public Variable getVariable(String name) throws MenohException {
-        IntByReference dtype = new IntByReference();
+        final IntByReference dtype = new IntByReference();
 
         checkError(MenohNative.INSTANCE.menoh_model_get_variable_dtype(handle, name, dtype));
 
-        IntByReference dimsSize = new IntByReference();
+        final IntByReference dimsSize = new IntByReference();
         checkError(MenohNative.INSTANCE.menoh_model_get_variable_dims_size(handle, name, dimsSize));
 
-        int[] dims = new int[dimsSize.getValue()];
+        final int[] dims = new int[dimsSize.getValue()];
 
         for (int i = 0; i < dimsSize.getValue(); ++i) {
-            IntByReference d = new IntByReference();
+            final IntByReference d = new IntByReference();
             checkError(MenohNative.INSTANCE.menoh_model_get_variable_dims_at(handle, name, i, d));
             dims[i] = d.getValue();
         }
 
-        PointerByReference buffer = new PointerByReference();
+        final PointerByReference buffer = new PointerByReference();
         checkError(MenohNative.INSTANCE.menoh_model_get_variable_buffer_handle(handle, name, buffer));
 
         return new Variable(DType.valueOf(dtype.getValue()), dims, buffer.getValue());

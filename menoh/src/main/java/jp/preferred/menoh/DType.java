@@ -28,7 +28,7 @@ public enum DType {
 
     public static DType valueOf(int value) throws MenohException {
         if (0 <= value && value < values.length) {
-            DType ret = values[value];
+            final DType ret = values[value];
             assert ret.id == value;
 
             return ret;
