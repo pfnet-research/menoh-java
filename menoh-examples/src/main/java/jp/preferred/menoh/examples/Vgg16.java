@@ -80,8 +80,8 @@ public class Vgg16 {
             model.run();
 
             // Get buffer pointer of output
-            ByteBuffer fc6OutputBuff = model.getVariable(fc6OutName).buffer();
-            ByteBuffer softmaxOutputBuff = model.getVariable(softmaxOutName).buffer();
+            ByteBuffer fc6OutputBuff = model.variable(fc6OutName).buffer();
+            ByteBuffer softmaxOutputBuff = model.variable(softmaxOutName).buffer();
 
             // Get output
             FloatBuffer fc6OutputFloatBuff = fc6OutputBuff.asFloatBuffer();
@@ -94,7 +94,7 @@ public class Vgg16 {
             int topK = 5;
 
             // Note: softmaxOutputBuff.array() is not available because it is a direct buffer
-            int[] softmaxDims = vpt.getVariableProfile(softmaxOutName).dims();
+            int[] softmaxDims = vpt.variableProfile(softmaxOutName).dims();
             float[] scoreArray = new float[softmaxDims[1]];
             softmaxOutputBuff.asFloatBuffer().get(scoreArray);
 
