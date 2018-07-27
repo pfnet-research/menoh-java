@@ -18,7 +18,7 @@ public class MenohExceptionTest {
         MenohException e = assertThrows(MenohException.class, () -> checkError(ErrorCode.STD_ERROR.getId()));
         assertAll("ErrorCode.STD_ERROR",
                 () -> assertEquals(ErrorCode.STD_ERROR, e.getErrorCode()),
-                () -> assertEquals("std_error: ", e.getMessage())
+                () -> assertEquals(" (std_error)", e.getMessage())
         );
     }
 
@@ -27,7 +27,7 @@ public class MenohExceptionTest {
         MenohException e = assertThrows(MenohException.class, () -> checkError(Integer.MAX_VALUE));
         assertAll("invalid ErrorCode",
                 () -> assertEquals(ErrorCode.UNDEFINED, e.getErrorCode()),
-                () -> assertEquals("2147483647: ", e.getMessage())
+                () -> assertEquals(" (2147483647)", e.getMessage())
         );
     }
 }
