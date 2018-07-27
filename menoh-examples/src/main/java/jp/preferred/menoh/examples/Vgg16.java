@@ -7,10 +7,7 @@ import jp.preferred.menoh.*;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -41,8 +38,8 @@ public class Vgg16 {
         }
 
         final String inputImagePath = args[0];
-        final String onnxModelPath = getResourceFilePath("/data/VGG16.onnx");
-        final String synsetWordsPath = getResourceFilePath("/data/synset_words.txt");
+        final String onnxModelPath = getResourceFilePath("data/VGG16.onnx");
+        final String synsetWordsPath = getResourceFilePath("data/synset_words.txt");
 
         BufferedImage image = ImageIO.read(new File(inputImagePath));
 
@@ -115,8 +112,12 @@ public class Vgg16 {
 
     private static String getResourceFilePath(String name) throws IOException, URISyntaxException {
         // ref. https://stackoverflow.com/a/17870390/1014818
-        URL url = Vgg16.class.getResource(name);
-        return Paths.get(url.toURI()).toFile().getCanonicalPath();
+        URL url = Vgg16.class.getClassLoader().getResource(name);
+        if (url != null) {
+            return Paths.get(url.toURI()).toFile().getCanonicalPath();
+        } else {
+            throw new FileNotFoundException("The specified resource not found: " + name);
+        }
     }
 
     private static BufferedImage resizeImage(BufferedImage image, int width, int height) {

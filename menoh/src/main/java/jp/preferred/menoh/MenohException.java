@@ -51,11 +51,11 @@ public class MenohException extends RuntimeException {
                 ec = ErrorCode.valueOf(errorCode);
             } catch (MenohException e) {
                 // ErrorCode.valueOf() throws MenohException if the error code is undefined
-                throw new MenohException(ErrorCode.UNDEFINED, String.format("%d: %s", errorCode, errorMessage), e);
+                throw new MenohException(ErrorCode.UNDEFINED, String.format("%s (%d)", errorMessage, errorCode), e);
             }
 
             final String errorCodeName = ec.toString().toLowerCase(Locale.ENGLISH);
-            throw new MenohException(ec, String.format("%s: %s", errorCodeName, errorMessage));
+            throw new MenohException(ec, String.format("%s (%s)", errorMessage, errorCodeName));
         }
     }
 }

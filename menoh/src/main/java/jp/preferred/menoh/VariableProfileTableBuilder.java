@@ -12,6 +12,10 @@ public class VariableProfileTableBuilder implements AutoCloseable {
         this.handle = handle;
     }
 
+    Pointer nativeHandle() {
+        return this.handle;
+    }
+
     @Override
     public void close() {
         synchronized (this) {
