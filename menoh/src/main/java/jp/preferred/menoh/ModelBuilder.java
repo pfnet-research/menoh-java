@@ -1,15 +1,23 @@
 package jp.preferred.menoh;
 
+import static jp.preferred.menoh.BufferUtils.copyToNativeMemory;
+import static jp.preferred.menoh.BufferUtils.toDirectByteBuffer;
 import static jp.preferred.menoh.MenohException.checkError;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
+
+import java.nio.ByteBuffer;
 
 public class ModelBuilder implements AutoCloseable {
     private Pointer handle;
 
     private ModelBuilder(Pointer handle) {
         this.handle = handle;
+    }
+
+    Pointer nativeHandle() {
+        return this.handle;
     }
 
     @Override
@@ -29,7 +37,16 @@ public class ModelBuilder implements AutoCloseable {
         return new ModelBuilder(ref.getValue());
     }
 
-    public void attachExternalBuffer(String name, Pointer bufferHandle) throws MenohException {
+    public void attach(String name, float[] values) throws MenohException {
+        attach(name, values, 0, values.length);
+    }
+
+    public void attach(String name, float[] values, int offset, int length) throws MenohException {
+        attach(name, toDirectByteBuffer(values, offset, length));
+    }
+
+    public void attach(String name, ByteBuffer buffer) throws MenohException {
+        final Pointer bufferHandle = copyToNativeMemory(buffer);
         checkError(MenohNative.INSTANCE.menoh_model_builder_attach_external_buffer(handle, name, bufferHandle));
     }
 

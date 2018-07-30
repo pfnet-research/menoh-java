@@ -1,9 +1,10 @@
 package jp.preferred.menoh;
 
 import static jp.preferred.menoh.MenohException.checkError;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+
+// CHECKSTYLE:OFF
+import static org.junit.jupiter.api.Assertions.*;
+// CHECKSTYLE:ON
 
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +19,8 @@ public class MenohExceptionTest {
         MenohException e = assertThrows(MenohException.class, () -> checkError(ErrorCode.STD_ERROR.getId()));
         assertAll("ErrorCode.STD_ERROR",
                 () -> assertEquals(ErrorCode.STD_ERROR, e.getErrorCode()),
-                () -> assertEquals(" (std_error)", e.getMessage())
+                () -> assertTrue(e.getMessage().endsWith(" (std_error)"),
+                        String.format("%s doesn't end with \"(std_error)\".", e.getMessage()))
         );
     }
 
@@ -27,7 +29,8 @@ public class MenohExceptionTest {
         MenohException e = assertThrows(MenohException.class, () -> checkError(Integer.MAX_VALUE));
         assertAll("invalid ErrorCode",
                 () -> assertEquals(ErrorCode.UNDEFINED, e.getErrorCode()),
-                () -> assertEquals(" (2147483647)", e.getMessage())
+                () -> assertTrue(e.getMessage().endsWith(" (2147483647)"),
+                        String.format("%s doesn't end with \"(2147483647)\".", e.getMessage()))
         );
     }
 }

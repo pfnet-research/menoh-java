@@ -21,12 +21,32 @@ public class TestUtils {
     }
 
     /**
-     * make {@link VariableProfileTableBuilder} for the {@link ModelData} made from `and.onnx`.
+     * make {@link VariableProfileTableBuilder} for the {@link ModelData} made from `and_op.onnx`.
      */
     public static VariableProfileTableBuilder makeVptBuilderForAndModel(int[] inputDims) {
-        VariableProfileTableBuilder builder = VariableProfileTableBuilder.make();
-        builder.addInputProfile("input", DType.FLOAT, inputDims);
-        builder.addOutputProfile("fc1", DType.FLOAT);
+        return makeVptBuilderForAndModel("input", inputDims, "output");
+    }
+
+    /**
+     * make {@link VariableProfileTableBuilder} for the {@link ModelData} made from `and_op.onnx`.
+     */
+    public static VariableProfileTableBuilder makeVptBuilderForAndModel(
+            String inputProfileName,
+            int[] inputDims,
+            String outputProfileName) {
+        final VariableProfileTableBuilder builder = VariableProfileTableBuilder.make();
+        builder.addInputProfile(inputProfileName, DType.FLOAT, inputDims);
+        builder.addOutputProfile(outputProfileName, DType.FLOAT);
+
+        return builder;
+    }
+
+    /**
+     * make {@link ModelBuilder} and attach the specified input.
+     */
+    public static ModelBuilder makeModelBuilderWithInput(VariableProfileTable vpt, String inputName, float[] input) {
+        final ModelBuilder builder = ModelBuilder.make(vpt);
+        builder.attach(inputName, input);
 
         return builder;
     }
