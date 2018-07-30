@@ -37,17 +37,17 @@ public class ModelBuilder implements AutoCloseable {
         return new ModelBuilder(ref.getValue());
     }
 
-    public void attach(String name, float[] values) throws MenohException {
-        attach(name, values, 0, values.length);
+    public void attach(String variableName, float[] values) throws MenohException {
+        attach(variableName, values, 0, values.length);
     }
 
-    public void attach(String name, float[] values, int offset, int length) throws MenohException {
-        attach(name, toDirectByteBuffer(values, offset, length));
+    public void attach(String variableName, float[] values, int offset, int length) throws MenohException {
+        attach(variableName, toDirectByteBuffer(values, offset, length));
     }
 
-    public void attach(String name, ByteBuffer buffer) throws MenohException {
+    public void attach(String variableName, ByteBuffer buffer) throws MenohException {
         final Pointer bufferHandle = copyToNativeMemory(buffer);
-        checkError(MenohNative.INSTANCE.menoh_model_builder_attach_external_buffer(handle, name, bufferHandle));
+        checkError(MenohNative.INSTANCE.menoh_model_builder_attach_external_buffer(handle, variableName, bufferHandle));
     }
 
     public Model build(ModelData modelData, String backendName, String backendConfig)

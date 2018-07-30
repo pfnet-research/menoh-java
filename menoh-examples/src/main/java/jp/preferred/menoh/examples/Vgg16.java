@@ -68,12 +68,9 @@ public class Vgg16 {
                 // internal memory buffers which are automatically allocated
                 ModelBuilder modelBuilder = makeModelBuilder(vpt, imageData, conv11InName);
 
-                // Build model
+                // Build model and run inference
                 Model model = buildAndRunModel(modelBuilder, modelData)
         ) {
-            // Run inference
-            model.run();
-
             // Get buffer pointer of output
             ByteBuffer fc6OutputBuff = model.variable(fc6OutName).buffer();
             ByteBuffer softmaxOutputBuff = model.variable(softmaxOutName).buffer();

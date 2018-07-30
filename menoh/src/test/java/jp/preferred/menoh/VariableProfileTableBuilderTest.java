@@ -35,6 +35,20 @@ public class VariableProfileTableBuilderTest {
     }
 
     @Test
+    public void addValidInputProfileWithInvalidDims() {
+        try (VariableProfileTableBuilder builder = VariableProfileTableBuilder.make()) {
+            MenohException e = assertThrows(MenohException.class,
+                    // test case: dims.length == 1
+                    () -> builder.addInputProfile("foo", DType.FLOAT, new int[] {1, 1, 1, 1, 1}));
+            assertAll("invalid dim size",
+                    () -> assertEquals(ErrorCode.UNDEFINED, e.getErrorCode()),
+                    () -> assertTrue(e.getMessage().startsWith("foo has an invalid dims size: 5"),
+                            String.format("%s doesn't start with \"foo has an invalid dims size: 5\"",
+                                    e.getMessage())));
+        }
+    }
+
+    @Test
     public void addValidOutputProfile() {
         try (VariableProfileTableBuilder builder = VariableProfileTableBuilder.make()) {
             builder.addOutputProfile("foo", DType.FLOAT);
