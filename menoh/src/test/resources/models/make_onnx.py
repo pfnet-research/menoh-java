@@ -23,8 +23,8 @@ class AND(chainer.Chain):
 
     def __call__(self, x):
         x.node._onnx_name = 'input'
-        h = F.relu(self.fc1(x))
-        h.node._onnx_name = 'fc1'
+        h = F.absolute(F.relu(self.fc1(x)))
+        h.node._onnx_name = 'output'
         return h
 
 
@@ -76,7 +76,7 @@ def main(logger):
     logger.info("Generating `{}` model and save it to `{}`".format(args.model, output_filename))
 
     try:
-        if args.model == 'and':
+        if args.model == 'and_op':
             model = AND()
             x = np.empty((1, 2), dtype=np.float32)
             with chainer.using_config('train', False), \

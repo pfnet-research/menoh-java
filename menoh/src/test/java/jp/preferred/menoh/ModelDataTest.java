@@ -1,6 +1,7 @@
 package jp.preferred.menoh;
 
 // CHECKSTYLE:OFF
+import static jp.preferred.menoh.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 // CHECKSTYLE:ON
 
@@ -9,7 +10,7 @@ import org.junit.jupiter.api.Test;
 public class ModelDataTest {
     @Test
     public void makeFromValidOnnxFile() throws Exception {
-        final String path = TestUtils.getResourceFilePath("models/and.onnx");
+        final String path = getResourceFilePath("models/and_op.onnx");
 
         try (ModelData modelData = ModelData.makeFromOnnx(path)) {
             assertNotNull(modelData.nativeHandle());
@@ -18,11 +19,14 @@ public class ModelDataTest {
 
     @Test
     public void closeModelDataIsIdempotent() throws Exception {
-        final String path = TestUtils.getResourceFilePath("models/and.onnx");
+        final String path = getResourceFilePath("models/and_op.onnx");
 
         ModelData modelData = null;
         try {
             modelData = ModelData.makeFromOnnx(path);
+
+            assertNotNull(modelData);
+            assertNotNull(modelData.nativeHandle());
         } finally {
             if (modelData != null) {
                 modelData.close();
@@ -48,7 +52,7 @@ public class ModelDataTest {
 
     @Test
     public void makeFromInvalidOnnxFile() throws Exception {
-        final String path = TestUtils.getResourceFilePath("models/invalid_format.onnx");
+        final String path = getResourceFilePath("models/invalid_format.onnx");
 
         MenohException e = assertThrows(MenohException.class, () -> ModelData.makeFromOnnx(path));
         assertAll("invalid onnx file",
@@ -61,8 +65,8 @@ public class ModelDataTest {
 
     @Test
     public void makeFromUnsupportedOnnxOpsetVersionFile() throws Exception {
-        // Note: This file is a copy of and.onnx which is edited the last byte to 127 (0x7e)
-        final String path = TestUtils.getResourceFilePath("models/unsupported_onnx_opset_version.onnx");
+        // Note: This file is a copy of and_op.onnx which is edited the last byte to 127 (0x7e)
+        final String path = getResourceFilePath("models/unsupported_onnx_opset_version.onnx");
 
         MenohException e = assertThrows(MenohException.class, () -> ModelData.makeFromOnnx(path));
         assertAll("invalid onnx file",
@@ -78,11 +82,11 @@ public class ModelDataTest {
 
     @Test
     public void optimizeModelData() throws Exception {
-        final String path = TestUtils.getResourceFilePath("models/and.onnx");
+        final String path = getResourceFilePath("models/and_op.onnx");
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = TestUtils.makeVptBuilderForAndModel(new int[] {1, 2});
+                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {1, 2});
                 VariableProfileTable vpt = vptBuilder.build(modelData)
         ) {
             modelData.optimize(vpt);

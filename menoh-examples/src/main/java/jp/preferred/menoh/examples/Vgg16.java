@@ -69,10 +69,8 @@ public class Vgg16 {
                 ModelBuilder modelBuilder = makeModelBuilder(vpt, imageData, conv11InName);
 
                 // Build model
-                Model model = modelBuilder.build(modelData, "mkldnn", "")
+                Model model = buildAndRunModel(modelBuilder, modelData)
         ) {
-            modelData.close(); // you can delete modelData explicitly after model building
-
             // Run inference
             model.run();
 
@@ -181,13 +179,19 @@ public class Vgg16 {
     private static ModelBuilder makeModelBuilder(
             VariableProfileTable vpt, float[] imageData, String conv11InName) throws MenohException {
         ModelBuilder modelBuilder = ModelBuilder.make(vpt);
-
-        Memory imageDataMemory = new Memory(imageData.length * 4);
-        Pointer imageDataPtr = imageDataMemory.share(0);
-        imageDataPtr.write(0, imageData, 0, imageData.length);
-        modelBuilder.attachExternalBuffer(conv11InName, imageDataPtr);
+        modelBuilder.attach(conv11InName, imageData);
 
         return modelBuilder;
+    }
+
+    public static Model buildAndRunModel(ModelBuilder modelBuilder, ModelData modelData) {
+        final Model model = modelBuilder.build(modelData, "mkldnn", "");
+        model.run();
+
+        // you can delete modelData explicitly after model building
+        modelData.close();
+
+        return model;
     }
 
     static class ScoreIndex {
