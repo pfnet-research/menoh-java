@@ -6,6 +6,9 @@ import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * It is created by {@link ModelBuilder}.
  */
@@ -13,14 +16,24 @@ public class Model implements AutoCloseable {
     private Pointer handle;
 
     /**
+     * A reference to the pointers to prevent them from getting garbage collected.
+     */
+    private final List<Pointer> attachedBuffers;
+
+    /**
      * @param handle a pointer to a native <code>menoh_model</code>
      */
-    Model(Pointer handle) {
+    Model(Pointer handle, List<Pointer> attachedBuffers) {
         this.handle = handle;
+        this.attachedBuffers = attachedBuffers;
     }
 
     Pointer nativeHandle() {
         return this.handle;
+    }
+
+    List<Pointer> attachedBuffers() {
+        return this.attachedBuffers;
     }
 
     @Override
@@ -29,6 +42,7 @@ public class Model implements AutoCloseable {
             if (handle != Pointer.NULL) {
                 MenohNative.INSTANCE.menoh_delete_model(handle);
                 handle = Pointer.NULL;
+                attachedBuffers.clear();
             }
         }
     }

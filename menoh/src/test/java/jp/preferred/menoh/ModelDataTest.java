@@ -18,23 +18,18 @@ public class ModelDataTest {
     }
 
     @Test
-    public void closeModelDataIsIdempotent() throws Exception {
+    public void closeModelData() throws Exception {
         final String path = getResourceFilePath("models/and_op.onnx");
 
-        ModelData modelData = null;
+        final ModelData modelData = ModelData.makeFromOnnx(path);
         try {
-            modelData = ModelData.makeFromOnnx(path);
-
-            assertNotNull(modelData);
             assertNotNull(modelData.nativeHandle());
         } finally {
-            if (modelData != null) {
-                modelData.close();
-                assertNull(modelData.nativeHandle());
+            modelData.close();
+            assertNull(modelData.nativeHandle());
 
-                // close() is an idempotent operation
-                modelData.close();
-            }
+            // close() is an idempotent operation
+            modelData.close();
         }
     }
 

@@ -8,12 +8,25 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 class BufferUtils {
+    /**
+     * <p>Copy a buffer to an allocated memory in the native heap. It copies the content ranging from
+     * <code>position()</code> to <code>(limit() - 1)</code> without changing them, except for a direct buffer.</p>
+     *
+     * <p>Note that the <code>order()</code> of the buffer should be {@link ByteOrder#nativeOrder()} because
+     * the native byte order of your platform may differ from JVM.</p>
+     *
+     * @param buffer the byte buffer from which to copy
+     * @return the pointer to the allocated native memory
+     */
     static Pointer copyToNativeMemory(final ByteBuffer buffer) {
+        final int length = buffer.remaining();
+
         if (buffer.isDirect()) {
-            // pass a pointer to the direct buffer directly instead of copying
-            return Native.getDirectBufferPointer(buffer);
+            final int offset = buffer.position();
+
+            // pass a pointer to the direct buffer without copying
+            return Native.getDirectBufferPointer(buffer).share(offset, length);
         } else {
-            final int length = buffer.remaining();
             final Memory mem = new Memory(length);
 
             int index;
@@ -33,10 +46,18 @@ class BufferUtils {
         }
     }
 
-    static ByteBuffer toDirectByteBuffer(float[] values, int offset, int length) {
-        final ByteBuffer buf = ByteBuffer.allocateDirect(length * 4).order(ByteOrder.nativeOrder());
-        buf.asFloatBuffer().put(values, offset, length);
+    /**
+     * <p>Copy the array to an allocated memory in the native heap.</p>
+     *
+     * @param values the array from which to copy
+     * @param offset the array index from which to start copying
+     * @param length the number of elements from <code>values</code> that must be copied
+     * @return the pointer to the allocated native memory
+     */
+    static Pointer copyToNativeMemory(final float[] values, final int offset, final int length) {
+        final Memory mem = new Memory((long) length * 4);
+        mem.write(0, values, offset, length);
 
-        return buf;
+        return mem.share(0, length);
     }
 }
