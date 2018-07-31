@@ -185,7 +185,7 @@ public class Vgg16 {
         final Model model = modelBuilder.build(modelData, "mkldnn", "");
         model.run();
 
-        // you can delete modelData explicitly after model building
+        // you can delete modelData explicitly after building a model
         modelData.close();
 
         return model;

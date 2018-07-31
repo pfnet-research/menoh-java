@@ -46,7 +46,7 @@ public class ModelBuilder implements AutoCloseable {
     }
 
     /**
-     * Make a {@link ModelBuilder} which can <code>attach()</code> a buffer to a variable of the model.
+     * Make a {@link ModelBuilder}.
      */
     public static ModelBuilder make(VariableProfileTable vpt) throws MenohException {
         final PointerByReference ref = new PointerByReference();
@@ -59,6 +59,9 @@ public class ModelBuilder implements AutoCloseable {
      * <p>Attach a buffer to the specified variable. It copies the content of the buffer to an allocated memory
      * in the native heap ranging from <code>position()</code> to <code>(limit() - 1)</code> without changing them,
      * except for a direct buffer.</p>
+     *
+     * <p>If the <code>buffer</code> is direct, you can rewrite it after running the model and <code>run()</code>
+     * again without rebuilding a model.</p>
      *
      * <p>Note that the <code>order()</code> of the buffer should be {@link ByteOrder#nativeOrder()} because
      * the native byte order of your platform may differ from JVM.</p>
@@ -105,8 +108,11 @@ public class ModelBuilder implements AutoCloseable {
     }
 
     /**
-     * Build a {@link Model} to <code>run()</code> based on a {@link ModelData} and the attached buffers
-     * by using the specified backend.
+     * <p>Build a {@link Model} to <code>run()</code> based on a {@link ModelData} and the attached buffers
+     * by using the specified backend.</p>
+     *
+     * <p>If you don't attach any external buffer, Menoh will allocate a new buffer for each input and output
+     * variable. It can be accessed via {@link Model#variable(String)}.</p>
      */
     public Model build(ModelData modelData, String backendName, String backendConfig) throws MenohException {
         final PointerByReference ref = new PointerByReference();

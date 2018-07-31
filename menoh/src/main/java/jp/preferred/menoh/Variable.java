@@ -19,6 +19,9 @@ public class Variable {
         return this.dtype;
     }
 
+    /**
+     * An array of dimension size.
+     */
     public int[] dims() {
         if (dims != null) {
             return this.dims.clone();
@@ -27,6 +30,10 @@ public class Variable {
         }
     }
 
+    /**
+     * A direct {@link ByteBuffer} which points to the native buffer of the variable. The buffer can be read
+     * and written via the methods of <code>ByteBuffer</code> before and after running the model.
+     */
     public ByteBuffer buffer() throws MenohException {
         final long offset = 0;
         final long elementSize = dtype.size();

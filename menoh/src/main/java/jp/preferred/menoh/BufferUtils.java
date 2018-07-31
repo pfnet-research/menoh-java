@@ -30,7 +30,7 @@ class BufferUtils {
         if (buffer.isDirect()) {
             final int offset = buffer.position();
 
-            // pass a pointer to the direct buffer without copying
+            // return a pointer to the direct buffer without copying
             return Native.getDirectBufferPointer(buffer).share(offset, length);
         } else {
             final Memory mem = new Memory(length);

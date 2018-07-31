@@ -214,17 +214,75 @@ public class ModelBuilderTest {
     }
 
     @Test
+    public void buildAndRunModelWithoutAttachingInput() throws Exception {
+        // [[0, 0], [0, 1], [1, 0], [1, 1]] -> [[0], [0], [0], [1]]
+        final String path = getResourceFilePath("models/and_op.onnx");
+        final int batchSize = 4;
+        final int inputDim = 2;
+        final float[] inputData1 = new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f};
+        final float[] inputData2 = new float[] {1f, 1f, 1f, 0f, 0f, 1f, 0f, 0f};
+        final int outputDim = 1;
+        final float[] expectedOutput1 = new float[] {0f, 0f, 0f, 1f};
+        final float[] expectedOutput2 = new float[] {1f, 0f, 0f, 0f};
+
+        try (
+                ModelData modelData = ModelData.makeFromOnnx(path);
+                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim});
+                VariableProfileTable vpt = vptBuilder.build(modelData);
+                ModelBuilder modelBuilder = ModelBuilder.make(vpt); // test case
+                Model model = modelBuilder.build(modelData, "mkldnn", "")
+        ) {
+            // you can delete modelData explicitly after building a model
+            modelData.close();
+
+            final Variable inputVar = model.variable("input");
+            assertAll("input variable",
+                    () -> assertEquals(DType.FLOAT, inputVar.dtype()),
+                    () -> assertArrayEquals(new int[] {batchSize, inputDim}, inputVar.dims())
+            );
+
+            // write input data to the internal buffer allocated by native Menoh
+            inputVar.buffer().asFloatBuffer().put(inputData1);
+            model.run();
+
+            final Variable outputVar = model.variable("output");
+            assertAll("output variable",
+                    () -> assertEquals(DType.FLOAT, outputVar.dtype()),
+                    () -> assertArrayEquals(new int[] {batchSize, outputDim}, outputVar.dims())
+            );
+            final float[] outputBuf = new float[outputVar.dims()[0]];
+            outputVar.buffer().asFloatBuffer().get(outputBuf);
+            assertArrayEquals(expectedOutput1, outputBuf);
+
+            // rewrite the internal buffer and run again
+            inputVar.buffer().asFloatBuffer().put(inputData2);
+            model.run();
+
+            final Variable outputVar2 = model.variable("output");
+            assertAll("output variable",
+                    () -> assertEquals(DType.FLOAT, outputVar2.dtype()),
+                    () -> assertArrayEquals(new int[] {batchSize, outputDim}, outputVar2.dims())
+            );
+            final float[] outputBuf2 = new float[outputVar2.dims()[0]];
+            outputVar.buffer().asFloatBuffer().get(outputBuf2);
+            assertArrayEquals(expectedOutput2, outputBuf2);
+        }
+    }
+
+    @Test
     public void buildAndRunModelIfInputIsDirectBuffer() throws Exception {
         // [[0, 0], [0, 1], [1, 0], [1, 1]] -> [[0], [0], [0], [1]]
         final String path = getResourceFilePath("models/and_op.onnx");
         final int batchSize = 4;
         final int inputDim = 2;
-        final float[] inputData = new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f};
+        final int inputLen = batchSize * inputDim;
         final ByteBuffer inputDataBuf =
-                ByteBuffer.allocateDirect(inputData.length * 4).order(ByteOrder.nativeOrder()); // test case
-        inputDataBuf.asFloatBuffer().put(inputData); // should be native order
+                ByteBuffer.allocateDirect(inputLen * 4).order(ByteOrder.nativeOrder()); // test case
+        final float[] inputData1 = new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f};
+        final float[] inputData2 = new float[] {1f, 1f, 1f, 0f, 0f, 1f, 0f, 0f};
         final int outputDim = 1;
-        final float[] expectedOutput = new float[] {0f, 0f, 0f, 1f};
+        final float[] expectedOutput1 = new float[] {0f, 0f, 0f, 1f};
+        final float[] expectedOutput2 = new float[] {1f, 0f, 0f, 0f};
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
@@ -233,10 +291,11 @@ public class ModelBuilderTest {
                 ModelBuilder modelBuilder = makeModelBuilderWithInput(vpt, "input", inputDataBuf);
                 Model model = modelBuilder.build(modelData, "mkldnn", "")
         ) {
-            model.run();
-
-            // you can delete modelData explicitly after model building
+            // you can delete modelData explicitly after building a model
             modelData.close();
+
+            inputDataBuf.asFloatBuffer().put(inputData1);
+            model.run();
 
             final Variable inputVar = model.variable("input");
             assertAll("input variable",
@@ -246,7 +305,7 @@ public class ModelBuilderTest {
             final int[] inputDims = inputVar.dims();
             final float[] inputBuf = new float[inputDims[0] * inputDims[1]];
             inputVar.buffer().asFloatBuffer().get(inputBuf);
-            assertArrayEquals(inputData, inputBuf);
+            assertArrayEquals(inputData1, inputBuf);
 
             final Variable outputVar = model.variable("output");
             assertAll("output variable",
@@ -255,7 +314,20 @@ public class ModelBuilderTest {
             );
             final float[] outputBuf = new float[outputVar.dims()[0]];
             outputVar.buffer().asFloatBuffer().get(outputBuf);
-            assertArrayEquals(expectedOutput, outputBuf);
+            assertArrayEquals(expectedOutput1, outputBuf);
+
+            // rewrite the direct buffer and run again
+            inputDataBuf.asFloatBuffer().put(inputData2);
+            model.run();
+
+            final Variable outputVar2 = model.variable("output");
+            assertAll("output variable",
+                    () -> assertEquals(DType.FLOAT, outputVar2.dtype()),
+                    () -> assertArrayEquals(new int[] {batchSize, outputDim}, outputVar2.dims())
+            );
+            final float[] outputBuf2 = new float[outputVar2.dims()[0]];
+            outputVar.buffer().asFloatBuffer().get(outputBuf2);
+            assertArrayEquals(expectedOutput2, outputBuf2);
         }
     }
 
@@ -279,10 +351,10 @@ public class ModelBuilderTest {
                 ModelBuilder modelBuilder = makeModelBuilderWithInput(vpt, "input", inputDataBuf);
                 Model model = modelBuilder.build(modelData, "mkldnn", "")
         ) {
-            model.run();
-
-            // you can delete modelData explicitly after model building
+            // you can delete modelData explicitly after building a model
             modelData.close();
+
+            model.run();
 
             final Variable inputVar = model.variable("input");
             assertAll("input variable",
@@ -326,10 +398,10 @@ public class ModelBuilderTest {
                 ModelBuilder modelBuilder = makeModelBuilderWithInput(vpt, "input", readOnlyInputDataBuf);
                 Model model = modelBuilder.build(modelData, "mkldnn", "")
         ) {
-            model.run();
-
-            // you can delete modelData explicitly after model building
+            // you can delete modelData explicitly after building a model
             modelData.close();
+
+            model.run();
 
             final Variable inputVar = model.variable("input");
             assertAll("input variable",
@@ -369,10 +441,10 @@ public class ModelBuilderTest {
                 ModelBuilder modelBuilder = makeModelBuilderWithInput(vpt, "input", inputData);
                 Model model = modelBuilder.build(modelData, "mkldnn", "")
         ) {
-            model.run();
-
-            // you can delete modelData explicitly after model building
+            // you can delete modelData explicitly after building a model
             modelData.close();
+
+            model.run();
 
             final Variable inputVar = model.variable("input");
             assertAll("input variable",
