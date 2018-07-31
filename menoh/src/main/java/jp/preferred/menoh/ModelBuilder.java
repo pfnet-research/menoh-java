@@ -11,6 +11,9 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A builder object for {@link Model}.
+ */
 public class ModelBuilder implements AutoCloseable {
     private Pointer handle;
 
@@ -32,7 +35,7 @@ public class ModelBuilder implements AutoCloseable {
     }
 
     /**
-     * Release the model builder.
+     * Releases the model builder.
      */
     @Override
     public void close() {
@@ -46,7 +49,7 @@ public class ModelBuilder implements AutoCloseable {
     }
 
     /**
-     * Make a {@link ModelBuilder}.
+     * Creates a {@link ModelBuilder}.
      */
     public static ModelBuilder make(VariableProfileTable vpt) throws MenohException {
         final PointerByReference ref = new PointerByReference();
@@ -56,16 +59,19 @@ public class ModelBuilder implements AutoCloseable {
     }
 
     /**
-     * <p>Attach a buffer to the specified variable. It copies the content of the buffer to an allocated memory
-     * in the native heap ranging from <code>position()</code> to <code>(limit() - 1)</code> without changing them,
-     * except for a direct buffer.</p>
+     * <p>Attaches a buffer to the specified variable.</p>
      *
-     * <p>If the <code>buffer</code> is direct, you can rewrite it after running the model and <code>run()</code>
-     * again without rebuilding a model.</p>
+     * <p>If the <code>buffer</code> is direct, it will be attached to the model directly without copying.
+     * You can <code>run()</code> the model again and again by updating the attached buffer instead of
+     * rebuilding the model.</p>
+     *
+     * <p>Otherwise, it copies the content of the buffer to an allocated memory in the native heap ranging
+     * from <code>position()</code> to <code>(limit() - 1)</code> without changing them.</p>
      *
      * <p>Note that the <code>order()</code> of the buffer should be {@link ByteOrder#nativeOrder()} because
      * the native byte order of your platform may differ from JVM.</p>
      *
+     * @param variableName the name of the variable
      * @param buffer the byte buffer from which to copy
      */
     public void attach(String variableName, ByteBuffer buffer) throws MenohException {
@@ -78,9 +84,10 @@ public class ModelBuilder implements AutoCloseable {
     }
 
     /**
-     * <p>Attach an array to the specified variable. It copies the content of the array to an allocated memory
+     * <p>Attaches an array to the specified variable. It copies the content of the array to an allocated memory
      * in the native heap.</p>
      *
+     * @param variableName the name of the variable
      * @param values the byte buffer from which to copy
      */
     public void attach(String variableName, float[] values) throws MenohException {
@@ -91,7 +98,10 @@ public class ModelBuilder implements AutoCloseable {
      * <p>Attach an array to the specified variable. It copies the content of the array to an allocated memory
      * in the native heap ranging from <code>offset</code> to <code>(offset + length - 1)</code>.</p>
      *
+     * @param variableName the name of the variable
      * @param values the byte buffer from which to copy
+     * @param offset the array index from which to start copying
+     * @param length the number of elements from <code>values</code> that must be copied
      */
     public void attach(String variableName, float[] values, int offset, int length) throws MenohException {
         final Pointer bufferHandle = copyToNativeMemory(values, offset, length);
@@ -108,11 +118,10 @@ public class ModelBuilder implements AutoCloseable {
     }
 
     /**
-     * <p>Build a {@link Model} to <code>run()</code> based on a {@link ModelData} and the attached buffers
-     * by using the specified backend.</p>
+     * <p>Builds a {@link Model} to <code>run()</code> by using the specified backend (e.g. "mkldnn").</p>
      *
-     * <p>If you don't attach any external buffer, Menoh will allocate a new buffer for each input and output
-     * variable. It can be accessed via {@link Model#variable(String)}.</p>
+     * <p>Menoh will allocate a new buffer for input and output variables to which an external buffer is not
+     * attached. It can be accessed via {@link Model#variable(String)}.</p>
      */
     public Model build(ModelData modelData, String backendName, String backendConfig) throws MenohException {
         final PointerByReference ref = new PointerByReference();

@@ -6,14 +6,12 @@ import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 
 /**
- * It is created by {@link VariableProfileTableBuilder}.
+ * A table which holds {@link VariableProfile}s for the {@link Model}. It will be built by
+ * {@link VariableProfileTableBuilder}.
  */
 public class VariableProfileTable implements AutoCloseable {
     private Pointer handle;
 
-    /**
-     * @param handle a pointer to a native <code>menoh_variable_profile_table</code>
-     */
     VariableProfileTable(Pointer handle) {
         this.handle = handle;
     }
@@ -32,6 +30,9 @@ public class VariableProfileTable implements AutoCloseable {
         }
     }
 
+    /**
+     * A {@link VariableProfile} with the specified name.
+     */
     public VariableProfile variableProfile(String variableName) throws MenohException {
         final IntByReference dtype = new IntByReference(0);
         checkError(MenohNative.INSTANCE.menoh_variable_profile_table_get_dtype(handle, variableName, dtype));

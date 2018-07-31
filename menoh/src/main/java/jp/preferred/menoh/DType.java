@@ -1,5 +1,8 @@
 package jp.preferred.menoh;
 
+/**
+ * A data type.
+ */
 public enum DType {
     FLOAT(0);
 
@@ -16,6 +19,9 @@ public enum DType {
         return id;
     }
 
+    /**
+     * The byte size of this {@link DType}.
+     */
     public int size() throws MenohException {
         switch (this) {
             case FLOAT:
@@ -26,6 +32,9 @@ public enum DType {
         }
     }
 
+    /**
+     * Returns the enum constant of the specified enum type with the specified ID.
+     */
     public static DType valueOf(int value) throws MenohException {
         if (0 <= value && value < values.length) {
             final DType ret = values[value];

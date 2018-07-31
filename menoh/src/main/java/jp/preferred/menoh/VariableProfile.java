@@ -1,5 +1,8 @@
 package jp.preferred.menoh;
 
+/**
+ * A variable profile added to {@link VariableProfileTable}.
+ */
 public class VariableProfile {
     private final DType dtype;
     private final int[] dims;
@@ -9,10 +12,16 @@ public class VariableProfile {
         this.dims = dims;
     }
 
+    /**
+     * A data type of the variable.
+     */
     public DType dtype() {
         return this.dtype;
     }
 
+    /**
+     * An array of dimension size.
+     */
     public int[] dims() {
         if (dims != null) {
             return this.dims.clone();
