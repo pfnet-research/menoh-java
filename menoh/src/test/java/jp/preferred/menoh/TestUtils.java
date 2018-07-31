@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 
 public class TestUtils {
@@ -44,9 +45,21 @@ public class TestUtils {
     /**
      * make {@link ModelBuilder} and attach the specified input.
      */
-    public static ModelBuilder makeModelBuilderWithInput(VariableProfileTable vpt, String inputName, float[] input) {
+    public static ModelBuilder makeModelBuilderWithInput(
+            VariableProfileTable vpt, String inputName, ByteBuffer inputData) {
         final ModelBuilder builder = ModelBuilder.make(vpt);
-        builder.attach(inputName, input);
+        builder.attach(inputName, inputData);
+
+        return builder;
+    }
+
+    /**
+     * make {@link ModelBuilder} and attach the specified input.
+     */
+    public static ModelBuilder makeModelBuilderWithInput(
+            VariableProfileTable vpt, String inputName, float[] inputData) {
+        final ModelBuilder builder = ModelBuilder.make(vpt);
+        builder.attach(inputName, inputData);
 
         return builder;
     }

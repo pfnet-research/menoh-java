@@ -10,20 +10,15 @@ import org.junit.jupiter.api.Test;
 public class VariableProfileTableBuilderTest {
     @Test
     public void makeVptBuilderIsSuccessful() {
-        VariableProfileTableBuilder builder = null;
+        final VariableProfileTableBuilder builder = VariableProfileTableBuilder.make();
         try {
-            builder = VariableProfileTableBuilder.make();
-
-            assertNotNull(builder);
             assertNotNull(builder.nativeHandle());
         } finally {
-            if (builder != null) {
-                builder.close();
-                assertNull(builder.nativeHandle());
+            builder.close();
+            assertNull(builder.nativeHandle());
 
-                // close() is an idempotent operation
-                builder.close();
-            }
+            // close() is an idempotent operation
+            builder.close();
         }
     }
 
@@ -112,7 +107,7 @@ public class VariableProfileTableBuilderTest {
     }
 
     @Test
-    public void closeVariableProfileTableIsIdempotent() throws Exception {
+    public void closeVariableProfileTable() throws Exception {
         final String path = getResourceFilePath("models/and_op.onnx");
         final int batchSize = 1;
         final int inputDim = 2;
@@ -121,18 +116,15 @@ public class VariableProfileTableBuilderTest {
                 ModelData modelData = ModelData.makeFromOnnx(path);
                 VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim})
         ) {
-            VariableProfileTable vpt = null;
+            final VariableProfileTable vpt = vptBuilder.build(modelData);
             try {
-                vpt = vptBuilder.build(modelData);
                 assertNotNull(vpt.nativeHandle());
             } finally {
-                if (vpt != null) {
-                    vpt.close();
-                    assertNull(vpt.nativeHandle());
+                vpt.close();
+                assertNull(vpt.nativeHandle());
 
-                    // close() is an idempotent operation
-                    vpt.close();
-                }
+                // close() is an idempotent operation
+                vpt.close();
             }
         }
     }
