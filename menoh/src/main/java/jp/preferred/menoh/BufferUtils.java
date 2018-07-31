@@ -15,10 +15,16 @@ class BufferUtils {
      * <p>Note that the <code>order()</code> of the buffer should be {@link ByteOrder#nativeOrder()} because
      * the native byte order of your platform may differ from JVM.</p>
      *
-     * @param buffer the byte buffer from which to copy
+     * @param buffer the non-empty byte buffer from which to copy
+     *
      * @return the pointer to the allocated native memory
+     * @throws IllegalArgumentException if <code>buffer</code> is empty
      */
     static Pointer copyToNativeMemory(final ByteBuffer buffer) {
+        if (buffer == null || buffer.remaining() <= 0) {
+            throw new IllegalArgumentException("buffer must not be null or empty");
+        }
+
         final int length = buffer.remaining();
 
         if (buffer.isDirect()) {
@@ -49,12 +55,18 @@ class BufferUtils {
     /**
      * <p>Copy the array to an allocated memory in the native heap.</p>
      *
-     * @param values the array from which to copy
+     * @param values the non-empty array from which to copy
      * @param offset the array index from which to start copying
      * @param length the number of elements from <code>values</code> that must be copied
+     *
      * @return the pointer to the allocated native memory
+     * @throws IllegalArgumentException if <code>buffer</code> is empty
      */
     static Pointer copyToNativeMemory(final float[] values, final int offset, final int length) {
+        if (values == null || values.length <= 0) {
+            throw new IllegalArgumentException("array must not be null or empty");
+        }
+
         final Memory mem = new Memory((long) length * 4);
         mem.write(0, values, offset, length);
 

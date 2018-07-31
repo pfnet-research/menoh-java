@@ -55,12 +55,9 @@ public class BufferUtilsTest {
         final ByteBuffer buf = ByteBuffer.allocateDirect(0);
         assertEquals(0, buf.remaining());
 
-        final Pointer ptr = BufferUtils.copyToNativeMemory(buf);
-        assertNotNull(ptr);
-        assertAll("buffer's state",
-                () -> assertEquals(0, buf.position()),
-                () -> assertEquals(0, buf.limit())
-        );
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> BufferUtils.copyToNativeMemory(buf));
     }
 
     @Test
