@@ -40,7 +40,6 @@ public class MenohException extends RuntimeException {
      * menoh_get_last_error_message</code>.
      *
      * @param errorCode an error code returned from the Menoh function
-     * @throws MenohException
      */
     static void checkError(int errorCode) throws MenohException {
         if (errorCode != ErrorCode.SUCCESS.getId()) {

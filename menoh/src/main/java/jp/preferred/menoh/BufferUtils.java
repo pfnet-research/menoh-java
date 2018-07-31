@@ -9,7 +9,7 @@ import java.nio.ByteOrder;
 
 class BufferUtils {
     /**
-     * <p>Copy a buffer to an allocated memory in the native heap. It copies the content ranging from
+     * <p>Copies a buffer to an allocated memory in the native heap. It copies the content ranging from
      * <code>position()</code> to <code>(limit() - 1)</code> without changing them, except for a direct buffer.</p>
      *
      * <p>Note that the <code>order()</code> of the buffer should be {@link ByteOrder#nativeOrder()} because
@@ -53,7 +53,7 @@ class BufferUtils {
     }
 
     /**
-     * <p>Copy the array to an allocated memory in the native heap.</p>
+     * <p>Copies the array to an allocated memory in the native heap.</p>
      *
      * @param values the non-empty array from which to copy
      * @param offset the array index from which to start copying

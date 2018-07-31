@@ -5,6 +5,9 @@ import static jp.preferred.menoh.MenohException.checkError;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 
+/**
+ * A builder object for {@link VariableProfileTable}.
+ */
 public class VariableProfileTableBuilder implements AutoCloseable {
     private Pointer handle;
 
@@ -26,6 +29,9 @@ public class VariableProfileTableBuilder implements AutoCloseable {
         }
     }
 
+    /**
+     * Creates a {@link VariableProfileTableBuilder}.
+     */
     public static VariableProfileTableBuilder make() throws MenohException {
         final PointerByReference ref = new PointerByReference();
         checkError(MenohNative.INSTANCE.menoh_make_variable_profile_table_builder(ref));
@@ -33,6 +39,9 @@ public class VariableProfileTableBuilder implements AutoCloseable {
         return new VariableProfileTableBuilder(ref.getValue());
     }
 
+    /**
+     * Adds an input profile to configure the specified variable of the model.
+     */
     public void addInputProfile(String name, DType dtype, int[] dims) throws MenohException {
         if (dims.length == 2) {
             checkError(
@@ -49,11 +58,17 @@ public class VariableProfileTableBuilder implements AutoCloseable {
         }
     }
 
+    /**
+     * Adds an output profile to configure the specified variable of the model.
+     */
     public void addOutputProfile(String name, DType dtype) throws MenohException {
         checkError(MenohNative.INSTANCE.menoh_variable_profile_table_builder_add_output_profile(
                 handle, name, dtype.getId()));
     }
 
+    /**
+     * Builds a {@link VariableProfileTable}. It is used for making {@link ModelBuilder}.
+     */
     public VariableProfileTable build(ModelData modelData) throws MenohException {
         final PointerByReference ref = new PointerByReference();
         checkError(MenohNative.INSTANCE.menoh_build_variable_profile_table(

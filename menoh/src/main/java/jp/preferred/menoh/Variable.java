@@ -4,6 +4,9 @@ import com.sun.jna.Pointer;
 
 import java.nio.ByteBuffer;
 
+/**
+ * An input or output variable of the model.
+ */
 public class Variable {
     private final DType dtype;
     private final int[] dims;
@@ -15,12 +18,15 @@ public class Variable {
         this.bufferHandle = bufferHandle;
     }
 
+    /**
+     * A data type of the variable.
+     */
     public DType dtype() {
         return this.dtype;
     }
 
     /**
-     * An array of dimension size.
+     * A array of dimension size.
      */
     public int[] dims() {
         if (dims != null) {

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * It is created by {@link ModelBuilder}.
+ * A representation of the model. It will be built by {@link ModelBuilder}.
  */
 public class Model implements AutoCloseable {
     private Pointer handle;
@@ -20,9 +20,6 @@ public class Model implements AutoCloseable {
      */
     private final List<Pointer> attachedBuffers;
 
-    /**
-     * @param handle a pointer to a native <code>menoh_model</code>
-     */
     Model(Pointer handle, List<Pointer> attachedBuffers) {
         this.handle = handle;
         this.attachedBuffers = attachedBuffers;
@@ -47,6 +44,9 @@ public class Model implements AutoCloseable {
         }
     }
 
+    /**
+     * Returns a {@link Variable} with the specified name.
+     */
     public Variable variable(String variableName) throws MenohException {
         final IntByReference dtype = new IntByReference();
 

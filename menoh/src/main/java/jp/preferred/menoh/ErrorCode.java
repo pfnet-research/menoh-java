@@ -37,6 +37,9 @@ public enum ErrorCode {
         return this.id;
     }
 
+    /**
+     * Returns the enum constant of the specified enum type with the specified ID.
+     */
     public static ErrorCode valueOf(int value) throws MenohException {
         final int index = value + 1;
         if (1 <= index && index < values.length) {
