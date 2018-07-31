@@ -101,7 +101,7 @@ public class ModelBuilderTest {
     }
 
     @Test
-    public void closeModel() throws Exception {
+    public void closeModelBeforeModelBuilder() throws Exception {
         final String path = getResourceFilePath("models/and_op.onnx");
         final int batchSize = 4;
         final int inputDim = 2;
@@ -141,6 +141,47 @@ public class ModelBuilderTest {
 
                 // close() is an idempotent operation
                 model.close();
+            }
+        }
+    }
+
+    @Test
+    public void closeModelBuilderBeforeModel() throws Exception {
+        final String path = getResourceFilePath("models/and_op.onnx");
+        final int batchSize = 4;
+        final int inputDim = 2;
+        final float[] input = new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f};
+        final String backendName = "mkldnn";
+        final String backendConfig = "";
+
+        try (
+                ModelData modelData = ModelData.makeFromOnnx(path);
+                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim});
+                VariableProfileTable vpt = vptBuilder.build(modelData)
+        ) {
+            try (ModelBuilder modelBuilder = ModelBuilder.make(vpt)) {
+                modelBuilder.attach("input", input);
+                assertTrue(!modelBuilder.attachedBuffers().isEmpty(), "attachedBuffers should not be empty");
+
+                final Model model = modelBuilder.build(modelData, backendName, backendConfig);
+                try {
+                    // close model builder before model
+                    modelBuilder.close();
+
+                    assertAll("model builder",
+                            () -> assertNotNull(modelBuilder.attachedBuffers()),
+                            () -> assertTrue(modelBuilder.attachedBuffers().isEmpty(),
+                                    "attachedBuffers should be empty")
+                    );
+                    assertAll("model",
+                            () -> assertNotNull(model.nativeHandle()),
+                            () -> assertNotNull(model.attachedBuffers()),
+                            () -> assertTrue(!model.attachedBuffers().isEmpty(),
+                                    "attachedBuffers should not be empty")
+                    );
+                } finally {
+                    model.close();
+                }
             }
         }
     }
