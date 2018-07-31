@@ -59,7 +59,7 @@ public class ModelBuilder implements AutoCloseable {
     }
 
     /**
-     * <p>Attaches a buffer to the specified variable.</p>
+     * <p>Attaches a non-empty buffer to the specified variable.</p>
      *
      * <p>If the <code>buffer</code> is direct, it will be attached to the model directly without copying.
      * You can <code>run()</code> the model again and again by updating the attached buffer instead of
@@ -73,6 +73,8 @@ public class ModelBuilder implements AutoCloseable {
      *
      * @param variableName the name of the variable
      * @param buffer the byte buffer from which to copy
+     *
+     * @throws IllegalArgumentException if <code>buffer</code> is null or empty
      */
     public void attach(String variableName, ByteBuffer buffer) throws MenohException {
         final Pointer bufferHandle = copyToNativeMemory(buffer);
@@ -84,24 +86,28 @@ public class ModelBuilder implements AutoCloseable {
     }
 
     /**
-     * <p>Attaches an array to the specified variable. It copies the content of the array to an allocated memory
-     * in the native heap.</p>
+     * <p>Attaches a non-empty array to the specified variable. It copies the content of the array to an allocated
+     * memory in the native heap.</p>
      *
      * @param variableName the name of the variable
      * @param values the byte buffer from which to copy
+     *
+     * @throws IllegalArgumentException if <code>values</code> is null or empty
      */
     public void attach(String variableName, float[] values) throws MenohException {
         attach(variableName, values, 0, values.length);
     }
 
     /**
-     * <p>Attach an array to the specified variable. It copies the content of the array to an allocated memory
-     * in the native heap ranging from <code>offset</code> to <code>(offset + length - 1)</code>.</p>
+     * <p>Attaches a non-empty array to the specified variable. It copies the content of the array to an allocated
+     * memory in the native heap ranging from <code>offset</code> to <code>(offset + length - 1)</code>.</p>
      *
      * @param variableName the name of the variable
      * @param values the byte buffer from which to copy
      * @param offset the array index from which to start copying
      * @param length the number of elements from <code>values</code> that must be copied
+     *
+     * @throws IllegalArgumentException if <code>values</code> is null or empty
      */
     public void attach(String variableName, float[] values, int offset, int length) throws MenohException {
         final Pointer bufferHandle = copyToNativeMemory(values, offset, length);

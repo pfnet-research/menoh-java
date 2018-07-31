@@ -18,7 +18,7 @@ class BufferUtils {
      * @param buffer the non-empty byte buffer from which to copy
      *
      * @return the pointer to the allocated native memory
-     * @throws IllegalArgumentException if <code>buffer</code> is empty
+     * @throws IllegalArgumentException if <code>buffer</code> is null or empty
      */
     static Pointer copyToNativeMemory(final ByteBuffer buffer) {
         if (buffer == null || buffer.remaining() <= 0) {
@@ -60,11 +60,11 @@ class BufferUtils {
      * @param length the number of elements from <code>values</code> that must be copied
      *
      * @return the pointer to the allocated native memory
-     * @throws IllegalArgumentException if <code>buffer</code> is empty
+     * @throws IllegalArgumentException if <code>values</code> is null or empty
      */
     static Pointer copyToNativeMemory(final float[] values, final int offset, final int length) {
         if (values == null || values.length <= 0) {
-            throw new IllegalArgumentException("array must not be null or empty");
+            throw new IllegalArgumentException("values must not be null or empty");
         }
 
         final Memory mem = new Memory((long) length * 4);
