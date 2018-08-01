@@ -49,26 +49,32 @@ public class Vgg16 {
 
         float[] imageData = renderToNctw(image);
 
-        try (ModelRunner modelRunner = ModelRunner
-                // Load ONNX model data
-                .fromOnnxFile(onnxModelPath)
+        try (
+                // The runner and builder must be closed explicitly to free the objects in the native memory
+                ModelRunnerBuilder modelRunnerBuilder = ModelRunner
+                    // Load ONNX model data
+                    .fromOnnxFile(onnxModelPath)
 
-                // Define input profile (name, dtype, dims) and output profile (name, dtype)
-                // dims of output is automatically calculated later
-                .addInputProfile(conv11InName, DType.FLOAT, new int[]{batchSize, channelNum, height, width})
-                .addOutputProfile(fc6OutName, DType.FLOAT)
-                .addOutputProfile(softmaxOutName, DType.FLOAT)
+                    // Define input profile (name, dtype, dims) and output profile (name, dtype)
+                    // dims of output is automatically calculated later
+                    .addInputProfile(conv11InName, DType.FLOAT, new int[]{batchSize, channelNum, height, width})
+                    .addOutputProfile(fc6OutName, DType.FLOAT)
+                    .addOutputProfile(softmaxOutName, DType.FLOAT)
 
-                // Make ModelBuilder and attach extenal memory buffer
-                // Variables which are not attached external memory buffer here are attached
-                // internal memory buffers which are automatically allocated
-                .attach(conv11InName, imageData)
+                    // Make ModelBuilder and attach extenal memory buffer
+                    // Variables which are not attached external memory buffer here are attached
+                    // internal memory buffers which are automatically allocated
+                    .attach(conv11InName, imageData)
 
-                // Build model
-                .backendName("mkldnn").backendConfig("").build()
+                    // Build model
+                    .backendName("mkldnn").backendConfig("");
+                 ModelRunner modelRunner = modelRunnerBuilder.build()
         ) {
-            modelRunner.run();
+            // modelRunnerBuilder can be deleted explicitly after building a model
+            modelRunnerBuilder.close();
+
             final Model model = modelRunner.model();
+            modelRunner.run();
 
             // Get buffer pointer of output
             ByteBuffer fc6OutputBuff = model.variable(fc6OutName).buffer();

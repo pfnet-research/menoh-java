@@ -169,15 +169,7 @@ public class ModelRunnerBuilder implements AutoCloseable {
             }
 
             final Model model = modelBuilder.build(modelData, backendName, backendConfig);
-            try {
-                // modelData can be deleted explicitly after building a model
-                modelData.close();
-            } catch (Throwable t) {
-                model.close();
-                throw t;
-            }
-
-            return new ModelRunner(this, model);
+            return new ModelRunner(model);
         }
     }
 }

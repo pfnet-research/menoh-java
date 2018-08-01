@@ -10,21 +10,14 @@ import java.util.Map;
  * A convenient wrapper for building and running {@link Model}.
  */
 public class ModelRunner implements AutoCloseable {
-    private final ModelRunnerBuilder builder;
-
     private final Model model;
 
     private static final String DEFAULT_BACKEND_NAME = "mkldnn";
 
     private static final String DEFAULT_BACKEND_CONFIG = "";
 
-    ModelRunner(ModelRunnerBuilder builder, Model model) {
-        this.builder = builder;
+    ModelRunner(Model model) {
         this.model = model;
-    }
-
-    ModelRunnerBuilder builder() {
-        return this.builder;
     }
 
     /**
@@ -37,7 +30,6 @@ public class ModelRunner implements AutoCloseable {
     @Override
     public void close() {
         model.close();
-        builder.close();
     }
 
     /**

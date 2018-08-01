@@ -19,35 +19,36 @@ public class ModelRunnerTest {
         final float[] expectedOutput1 = new float[] {0f, 0f, 0f, 1f};
         final float[] expectedOutput2 = new float[] {1f, 0f, 0f, 0f};
 
-        try (ModelRunner runner = ModelRunner
-                .fromOnnxFile(path)
-                .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                .addOutputProfile("output", DType.FLOAT)
-                .attach("input", inputData1)
-                .backendName("mkldnn")
-                .backendConfig("")
-                .build()) {
-
-            assertAll("model",
-                    () -> assertNotNull(runner.model()),
-                    () -> assertNotNull(runner.model().nativeHandle())
-            );
-            assertNotNull(runner.builder());
+        try (
+                ModelRunnerBuilder builder = ModelRunner
+                        .fromOnnxFile(path)
+                        .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile("output", DType.FLOAT)
+                        .attach("input", inputData1)
+                        .backendName("mkldnn")
+                        .backendConfig("");
+                 ModelRunner runner = builder.build()
+        ) {
             assertAll("model data in builder",
-                    () -> assertNotNull(runner.builder().modelData()),
-                    () -> assertNull(runner.builder().modelData().nativeHandle()) // deleted in build()
+                    () -> assertNotNull(builder.modelData()),
+                    () -> assertNotNull(builder.modelData().nativeHandle())
             );
             assertAll("vpt builder in builder",
-                    () -> assertNotNull(runner.builder().vptBuilder()),
-                    () -> assertNotNull(runner.builder().vptBuilder().nativeHandle())
+                    () -> assertNotNull(builder.vptBuilder()),
+                    () -> assertNotNull(builder.vptBuilder().nativeHandle())
             );
             assertAll("backend config in builder",
-                    () -> assertEquals("mkldnn", runner.builder().backendName()),
-                    () -> assertEquals("", runner.builder().backendConfig())
+                    () -> assertEquals("mkldnn", builder.backendName()),
+                    () -> assertEquals("", builder.backendConfig())
             );
             assertAll("attached buffers in builder",
-                    () -> assertNotNull(runner.builder().attachedBuffers()),
-                    () -> assertNotNull(runner.builder().attachedBuffers().get("input"))
+                    () -> assertNotNull(builder.attachedBuffers()),
+                    () -> assertNotNull(builder.attachedBuffers().get("input"))
+            );
+
+            assertAll("model in runner",
+                    () -> assertNotNull(runner.model()),
+                    () -> assertNotNull(runner.model().nativeHandle())
             );
 
             // run the model
@@ -84,54 +85,62 @@ public class ModelRunnerTest {
         final int inputDim = 2;
         final float[] inputData = new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f};
 
-        final ModelRunner runner = ModelRunner
+        final ModelRunnerBuilder builder = ModelRunner
                 .fromOnnxFile(path)
                 .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                 .addOutputProfile("output", DType.FLOAT)
                 .attach("input", inputData)
                 .backendName("mkldnn")
-                .backendConfig("")
-                .build();
+                .backendConfig("");
+        final ModelRunner runner = builder.build();
         try {
-            assertAll("model",
+            assertNotNull(builder);
+            assertAll("model data in builder",
+                    () -> assertNotNull(builder.modelData()),
+                    () -> assertNotNull(builder.modelData().nativeHandle())
+            );
+            assertAll("vpt builder in builder",
+                    () -> assertNotNull(builder.vptBuilder()),
+                    () -> assertNotNull(builder.vptBuilder().nativeHandle())
+            );
+            assertAll("backend config in builder",
+                    () -> assertEquals("mkldnn", builder.backendName()),
+                    () -> assertEquals("", builder.backendConfig())
+            );
+            assertAll("attached buffers in builder",
+                    () -> assertNotNull(builder.attachedBuffers()),
+                    () -> assertNotNull(builder.attachedBuffers().get("input"))
+            );
+
+            assertNotNull(runner);
+            assertAll("model in runner",
                     () -> assertNotNull(runner.model()),
                     () -> assertNotNull(runner.model().nativeHandle())
             );
-            assertNotNull(runner.builder());
+        } finally {
+            builder.close();
             assertAll("model data in builder",
-                    () -> assertNotNull(runner.builder().modelData()),
-                    () -> assertNull(runner.builder().modelData().nativeHandle()) // deleted in build()
+                    () -> assertNotNull(builder.modelData()),
+                    () -> assertNull(builder.modelData().nativeHandle())
             );
             assertAll("vpt builder in builder",
-                    () -> assertNotNull(runner.builder().vptBuilder()),
-                    () -> assertNotNull(runner.builder().vptBuilder().nativeHandle())
-            );
-            assertAll("backend config in builder",
-                    () -> assertEquals("mkldnn", runner.builder().backendName()),
-                    () -> assertEquals("", runner.builder().backendConfig())
+                    () -> assertNotNull(builder.vptBuilder()),
+                    () -> assertNull(builder.vptBuilder().nativeHandle())
             );
             assertAll("attached buffers in builder",
-                    () -> assertNotNull(runner.builder().attachedBuffers()),
-                    () -> assertNotNull(runner.builder().attachedBuffers().get("input"))
+                    () -> assertNotNull(builder.attachedBuffers()),
+                    () -> assertTrue(builder.attachedBuffers().isEmpty(),
+                            "attachedBuffers should be empty")
             );
-        } finally {
+
             runner.close();
             assertAll("model",
                     () -> assertNotNull(runner.model()),
                     () -> assertNull(runner.model().nativeHandle())
             );
-            assertNotNull(runner.builder());
-            assertAll("vpt builder in builder",
-                    () -> assertNotNull(runner.builder().vptBuilder()),
-                    () -> assertNull(runner.builder().vptBuilder().nativeHandle())
-            );
-            assertAll("attached buffers in builder",
-                    () -> assertNotNull(runner.builder().attachedBuffers()),
-                    () -> assertTrue(runner.builder().attachedBuffers().isEmpty(),
-                            "attachedBuffers should be empty")
-            );
 
             // close() is an idempotent operation
+            builder.close();
             runner.close();
         }
     }
