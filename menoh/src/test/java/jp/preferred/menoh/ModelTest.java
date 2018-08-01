@@ -19,7 +19,7 @@ public class ModelTest {
         final float[] inputData = new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f};
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
@@ -45,7 +45,7 @@ public class ModelTest {
         final float[] inputData = new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f};
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
@@ -85,7 +85,7 @@ public class ModelTest {
         final String backendConfig = "";
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
@@ -116,7 +116,7 @@ public class ModelTest {
         final String backendConfig = "";
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
@@ -163,7 +163,7 @@ public class ModelTest {
         final String backendConfig = "";
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
@@ -205,7 +205,7 @@ public class ModelTest {
         final String backendConfig = "";
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
@@ -238,7 +238,7 @@ public class ModelTest {
         final float[] expectedOutput2 = new float[] {1f, 0f, 0f, 0f};
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
@@ -299,7 +299,7 @@ public class ModelTest {
         final float[] expectedOutput2 = new float[] {1f, 0f, 0f, 0f};
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
@@ -361,7 +361,7 @@ public class ModelTest {
         final float[] expectedOutput = new float[] {0f, 0f, 0f, 1f};
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
@@ -410,7 +410,7 @@ public class ModelTest {
         final float[] expectedOutput = new float[] {0f, 0f, 0f, 1f};
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
@@ -455,7 +455,7 @@ public class ModelTest {
         final float[] expectedOutput = new float[] {0f, 0f, 0f, 1f};
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);

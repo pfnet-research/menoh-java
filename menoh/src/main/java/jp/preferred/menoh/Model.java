@@ -6,7 +6,6 @@ import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

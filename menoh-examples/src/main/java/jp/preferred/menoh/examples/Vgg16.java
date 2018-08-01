@@ -49,28 +49,27 @@ public class Vgg16 {
 
         float[] imageData = renderToNctw(image);
 
-        try (
+        try (ModelRunner modelRunner = ModelRunner
                 // Load ONNX model data
-                ModelData modelData = ModelData.makeFromOnnx(onnxModelPath);
+                .fromOnnxFile(onnxModelPath)
 
                 // Define input profile (name, dtype, dims) and output profile (name, dtype)
                 // dims of output is automatically calculated later
-                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
-                        .addInputProfile(conv11InName, DType.FLOAT, new int[]{batchSize, channelNum, height, width})
-                        .addOutputProfile(fc6OutName, DType.FLOAT)
-                        .addOutputProfile(softmaxOutName, DType.FLOAT);
-
-                // Build VariableProfileTable and get variable dims (if needed)
-                VariableProfileTable vpt = vptBuilder.build(modelData);
+                .addInputProfile(conv11InName, DType.FLOAT, new int[]{batchSize, channelNum, height, width})
+                .addOutputProfile(fc6OutName, DType.FLOAT)
+                .addOutputProfile(softmaxOutName, DType.FLOAT)
 
                 // Make ModelBuilder and attach extenal memory buffer
                 // Variables which are not attached external memory buffer here are attached
                 // internal memory buffers which are automatically allocated
-                ModelBuilder modelBuilder = Model.builder(vpt).attach(conv11InName, imageData);
+                .attach(conv11InName, imageData)
 
-                // Build model and run inference
-                Model model = buildAndRunModel(modelBuilder, modelData)
+                // Build model
+                .backendName("mkldnn").backendConfig("").build()
         ) {
+            modelRunner.run();
+            final Model model = modelRunner.model();
+
             // Get buffer pointer of output
             ByteBuffer fc6OutputBuff = model.variable(fc6OutName).buffer();
             ByteBuffer softmaxOutputBuff = model.variable(softmaxOutName).buffer();
@@ -86,7 +85,7 @@ public class Vgg16 {
             int topK = 5;
 
             // Note: softmaxOutputBuff.array() is not available because it is a direct buffer
-            int[] softmaxDims = vpt.variableProfile(softmaxOutName).dims();
+            int[] softmaxDims = model.variable(softmaxOutName).dims();
             float[] scoreArray = new float[softmaxDims[1]];
             softmaxOutputBuff.asFloatBuffer().get(scoreArray);
 
@@ -153,16 +152,6 @@ public class Vgg16 {
         }
 
         return data;
-    }
-
-    public static Model buildAndRunModel(ModelBuilder modelBuilder, ModelData modelData) {
-        final Model model = modelBuilder.build(modelData, "mkldnn", "");
-        model.run();
-
-        // you can delete modelData explicitly after building a model
-        modelData.close();
-
-        return model;
     }
 
     static class ScoreIndex {

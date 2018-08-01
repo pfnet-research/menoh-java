@@ -58,7 +58,7 @@ public class VariableProfileTableTest {
         final int outputDim = 1;
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
@@ -88,7 +88,7 @@ public class VariableProfileTableTest {
         final int outputDim = 1;
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
@@ -117,7 +117,7 @@ public class VariableProfileTableTest {
         final int inputDim = 2;
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT)
@@ -145,7 +145,7 @@ public class VariableProfileTableTest {
         final String outputProfileName = "output";
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile(inputProfileName, DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile(outputProfileName, DType.FLOAT)
@@ -170,7 +170,7 @@ public class VariableProfileTableTest {
         final String outputProfileName = "output";
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile(inputProfileName, DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile(outputProfileName, DType.FLOAT)
@@ -198,7 +198,7 @@ public class VariableProfileTableTest {
         final String outputProfileName = "__non_existent_variable__"; // test case
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile(inputProfileName, DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile(outputProfileName, DType.FLOAT)

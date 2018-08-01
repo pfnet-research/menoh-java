@@ -39,7 +39,7 @@ public class Variable {
     /**
      * The length of buffer.
      */
-    public long length() {
+    long length() {
         if (dims.length > 0) {
             long length = 1;
             for (int d : dims) {

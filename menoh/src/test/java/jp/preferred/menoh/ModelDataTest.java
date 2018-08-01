@@ -12,7 +12,7 @@ public class ModelDataTest {
     public void makeFromValidOnnxFile() throws Exception {
         final String path = getResourceFilePath("models/and_op.onnx");
 
-        try (ModelData modelData = ModelData.makeFromOnnx(path)) {
+        try (ModelData modelData = ModelData.fromOnnxFile(path)) {
             assertNotNull(modelData.nativeHandle());
         }
     }
@@ -21,7 +21,7 @@ public class ModelDataTest {
     public void closeModelData() throws Exception {
         final String path = getResourceFilePath("models/and_op.onnx");
 
-        final ModelData modelData = ModelData.makeFromOnnx(path);
+        final ModelData modelData = ModelData.fromOnnxFile(path);
         try {
             assertNotNull(modelData.nativeHandle());
         } finally {
@@ -36,7 +36,7 @@ public class ModelDataTest {
     @Test
     public void makeFromNonExistentOnnxFile() {
         MenohException e = assertThrows(
-                MenohException.class, () -> ModelData.makeFromOnnx("__NON_EXISTENT_FILENAME__"));
+                MenohException.class, () -> ModelData.fromOnnxFile("__NON_EXISTENT_FILENAME__"));
         assertAll("non-existent onnx file",
                 () -> assertEquals(ErrorCode.INVALID_FILENAME, e.getErrorCode()),
                 () -> assertEquals(
@@ -49,7 +49,7 @@ public class ModelDataTest {
     public void makeFromInvalidOnnxFile() throws Exception {
         final String path = getResourceFilePath("models/invalid_format.onnx");
 
-        MenohException e = assertThrows(MenohException.class, () -> ModelData.makeFromOnnx(path));
+        MenohException e = assertThrows(MenohException.class, () -> ModelData.fromOnnxFile(path));
         assertAll("invalid onnx file",
                 () -> assertEquals(ErrorCode.ONNX_PARSE_ERROR, e.getErrorCode()),
                 () -> assertEquals(
@@ -63,7 +63,7 @@ public class ModelDataTest {
         // Note: This file is a copy of and_op.onnx which is edited the last byte to 127 (0x7e)
         final String path = getResourceFilePath("models/unsupported_onnx_opset_version.onnx");
 
-        MenohException e = assertThrows(MenohException.class, () -> ModelData.makeFromOnnx(path));
+        MenohException e = assertThrows(MenohException.class, () -> ModelData.fromOnnxFile(path));
         assertAll("invalid onnx file",
                 () -> assertEquals(ErrorCode.UNSUPPORTED_ONNX_OPSET_VERSION, e.getErrorCode()),
                 () -> assertEquals(
@@ -80,7 +80,7 @@ public class ModelDataTest {
         final String path = getResourceFilePath("models/and_op.onnx");
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {1, 2})
                         .addOutputProfile("output", DType.FLOAT);
