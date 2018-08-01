@@ -11,7 +11,7 @@ import com.sun.jna.ptr.PointerByReference;
 public class VariableProfileTableBuilder implements AutoCloseable {
     private Pointer handle;
 
-    private VariableProfileTableBuilder(Pointer handle) {
+    VariableProfileTableBuilder(Pointer handle) {
         this.handle = handle;
     }
 
@@ -27,16 +27,6 @@ public class VariableProfileTableBuilder implements AutoCloseable {
                 handle = Pointer.NULL;
             }
         }
-    }
-
-    /**
-     * Creates a {@link VariableProfileTableBuilder}.
-     */
-    public static VariableProfileTableBuilder make() throws MenohException {
-        final PointerByReference ref = new PointerByReference();
-        checkError(MenohNative.INSTANCE.menoh_make_variable_profile_table_builder(ref));
-
-        return new VariableProfileTableBuilder(ref.getValue());
     }
 
     /**

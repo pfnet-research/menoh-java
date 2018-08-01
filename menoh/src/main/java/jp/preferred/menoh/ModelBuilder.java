@@ -22,7 +22,7 @@ public class ModelBuilder implements AutoCloseable {
      */
     private final List<Pointer> attachedBuffers = new ArrayList<>();
 
-    private ModelBuilder(Pointer handle) {
+    ModelBuilder(Pointer handle) {
         this.handle = handle;
     }
 
@@ -46,16 +46,6 @@ public class ModelBuilder implements AutoCloseable {
                 attachedBuffers.clear();
             }
         }
-    }
-
-    /**
-     * Creates a {@link ModelBuilder}.
-     */
-    public static ModelBuilder make(VariableProfileTable vpt) throws MenohException {
-        final PointerByReference ref = new PointerByReference();
-        checkError(MenohNative.INSTANCE.menoh_make_model_builder(vpt.nativeHandle(), ref));
-
-        return new ModelBuilder(ref.getValue());
     }
 
     /**

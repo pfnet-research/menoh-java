@@ -81,7 +81,9 @@ public class ModelDataTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {1, 2});
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, new int[] {1, 2})
+                        .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData)
         ) {
             modelData.optimize(vpt);

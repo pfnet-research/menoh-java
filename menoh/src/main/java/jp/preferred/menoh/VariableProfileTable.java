@@ -4,6 +4,7 @@ import static jp.preferred.menoh.MenohException.checkError;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
+import com.sun.jna.ptr.PointerByReference;
 
 /**
  * A table which holds {@link VariableProfile}s for the {@link Model}. It will be built by
@@ -28,6 +29,16 @@ public class VariableProfileTable implements AutoCloseable {
                 handle = Pointer.NULL;
             }
         }
+    }
+
+    /**
+     * Creates a {@link VariableProfileTableBuilder}.
+     */
+    public static VariableProfileTableBuilder builder() throws MenohException {
+        final PointerByReference ref = new PointerByReference();
+        checkError(MenohNative.INSTANCE.menoh_make_variable_profile_table_builder(ref));
+
+        return new VariableProfileTableBuilder(ref.getValue());
     }
 
     /**

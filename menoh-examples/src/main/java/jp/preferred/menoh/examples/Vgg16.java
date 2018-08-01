@@ -1,7 +1,5 @@
 package jp.preferred.menoh.examples;
 
-import com.sun.jna.Memory;
-import com.sun.jna.Pointer;
 import jp.preferred.menoh.*;
 
 import java.awt.Graphics2D;
@@ -57,8 +55,10 @@ public class Vgg16 {
 
                 // Define input profile (name, dtype, dims) and output profile (name, dtype)
                 // dims of output is automatically calculated later
-                VariableProfileTableBuilder vptBuilder = makeVariableProfileTableBuilder(
-                        conv11InName, batchSize, channelNum, height, width, fc6OutName, softmaxOutName);
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile(conv11InName, DType.FLOAT, new int[]{batchSize, channelNum, height, width})
+                        .addOutputProfile(fc6OutName, DType.FLOAT)
+                        .addOutputProfile(softmaxOutName, DType.FLOAT);
 
                 // Build VariableProfileTable and get variable dims (if needed)
                 VariableProfileTable vpt = vptBuilder.build(modelData);
@@ -66,7 +66,7 @@ public class Vgg16 {
                 // Make ModelBuilder and attach extenal memory buffer
                 // Variables which are not attached external memory buffer here are attached
                 // internal memory buffers which are automatically allocated
-                ModelBuilder modelBuilder = makeModelBuilder(vpt, imageData, conv11InName);
+                ModelBuilder modelBuilder = Model.builder(vpt).attach(conv11InName, imageData);
 
                 // Build model and run inference
                 Model model = buildAndRunModel(modelBuilder, modelData)
@@ -153,32 +153,6 @@ public class Vgg16 {
         }
 
         return data;
-    }
-
-    private static VariableProfileTableBuilder makeVariableProfileTableBuilder(
-            String conv11InName,
-            int batchSize,
-            int channelNum,
-            int height,
-            int width,
-            String fc6OutName,
-            String softmaxOutName) throws MenohException {
-        VariableProfileTableBuilder vptBuilder = VariableProfileTableBuilder.make();
-        vptBuilder.addInputProfile(conv11InName, DType.FLOAT,
-                new int[]{batchSize, channelNum, height, width});
-
-        vptBuilder.addOutputProfile(fc6OutName, DType.FLOAT);
-        vptBuilder.addOutputProfile(softmaxOutName, DType.FLOAT);
-
-        return vptBuilder;
-    }
-
-    private static ModelBuilder makeModelBuilder(
-            VariableProfileTable vpt, float[] imageData, String conv11InName) throws MenohException {
-        ModelBuilder modelBuilder = ModelBuilder.make(vpt);
-        modelBuilder.attach(conv11InName, imageData);
-
-        return modelBuilder;
     }
 
     public static Model buildAndRunModel(ModelBuilder modelBuilder, ModelData modelData) {
