@@ -78,6 +78,9 @@ public class Model implements AutoCloseable {
         return new Variable(DType.valueOf(dtype.getValue()), dims, buffer.getValue());
     }
 
+    /**
+     * Run this model.
+     */
     public void run() throws MenohException {
         checkError(MenohNative.INSTANCE.menoh_model_run(handle));
     }

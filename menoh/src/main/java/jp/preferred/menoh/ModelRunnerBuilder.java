@@ -31,6 +31,26 @@ public class ModelRunnerBuilder implements AutoCloseable {
         this.attachedBuffers = attachedBuffers;
     }
 
+    ModelData modelData() {
+        return this.modelData;
+    }
+
+    VariableProfileTableBuilder vptBuilder() {
+        return this.vptBuilder;
+    }
+
+    String backendName() {
+        return this.backendName;
+    }
+
+    String backendConfig() {
+        return this.backendConfig;
+    }
+
+    Map<String, ByteBuffer> attachedBuffers() {
+        return this.attachedBuffers;
+    }
+
     @Override
     public void close() {
         vptBuilder.close();
