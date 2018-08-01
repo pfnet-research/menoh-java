@@ -43,8 +43,18 @@ public class ModelRunnerBuilder implements AutoCloseable {
         return this.backendName;
     }
 
+    public ModelRunnerBuilder backendName(String backendName) {
+        this.backendName = backendName;
+        return this;
+    }
+
     String backendConfig() {
         return this.backendConfig;
+    }
+
+    public ModelRunnerBuilder backendConfig(String backendConfig) {
+        this.backendConfig = backendConfig;
+        return this;
     }
 
     Map<String, ByteBuffer> attachedBuffers() {
@@ -58,16 +68,6 @@ public class ModelRunnerBuilder implements AutoCloseable {
 
         // allow the attached buffers to GC its allocated memory
         attachedBuffers.clear();
-    }
-
-    public ModelRunnerBuilder backendName(String backendName) {
-        this.backendName = backendName;
-        return this;
-    }
-
-    public ModelRunnerBuilder backendConfig(String backendConfig) {
-        this.backendConfig = backendConfig;
-        return this;
     }
 
     /**
@@ -153,6 +153,12 @@ public class ModelRunnerBuilder implements AutoCloseable {
         return this;
     }
 
+    /**
+     * <p>Builds a {@link ModelRunner} to <code>run()</code> by using the specified backend (e.g. "mkldnn").</p>
+     *
+     * <p>Menoh will allocate a new buffer for input and output variables to which an external buffer is not
+     * attached. It can be accessed via {@link Model#variable(String)} in the <code>ModelRunner</code> object.</p>
+     */
     public ModelRunner build() {
         try (
                 VariableProfileTable vpt = vptBuilder.build(modelData);

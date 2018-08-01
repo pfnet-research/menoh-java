@@ -40,6 +40,9 @@ public class ModelRunner implements AutoCloseable {
         builder.close();
     }
 
+    /**
+     * Loads an ONNX model from the specified file.
+     */
     public static ModelRunnerBuilder fromOnnxFile(String path) {
         ModelData modelData = null;
         VariableProfileTableBuilder vptBuilder = null;
@@ -66,23 +69,21 @@ public class ModelRunner implements AutoCloseable {
     }
 
     /**
-     * <p>Run this model after copying a non-empty array to the specified variable.</p>
+     * <p>Run this model after assigning a non-empty array to the specified variable.</p>
      *
      * @param name the name of the input variable
      * @param values the values to be copied to the input variable
-     * @return the output variables of the model
      */
     public void run(String name, float[] values) {
         run(name, values, 0, values.length);
     }
 
     /**
-     * <p>Run this model after copying a non-empty array to the specified variable. It copies the content
+     * <p>Run this model after assigning a non-empty array to the specified variable. It copies the content
      * ranging from <code>offset</code> to <code>(offset + length - 1)</code>.</p>
      *
      * @param name the name of the input variable
      * @param values the values to be copied to the input variable
-     * @return the output variables of the model
      */
     public void run(String name, float[] values, int offset, int length) {
         final ByteBuffer buffer = ByteBuffer.allocateDirect(length * 4).order(ByteOrder.nativeOrder());
@@ -92,7 +93,7 @@ public class ModelRunner implements AutoCloseable {
     }
 
     /**
-     * <p>Run this model after copying a non-empty buffer to the specified variable. It copies the content
+     * <p>Run this model after assigning a non-empty buffer to the specified variable. It copies the content
      * ranging from <code>position()</code> to <code>(limit() - 1)</code> without changing them, even if
      * the <code>buffer</code> is direct unlike {@link ModelRunnerBuilder#attach(String, ByteBuffer)}.</p>
      *
@@ -101,14 +102,13 @@ public class ModelRunner implements AutoCloseable {
      *
      * @param name the name of the input variable
      * @param buffer the buffer to be copied to the input variable
-     * @return the output variables of the model
      */
     public void run(String name, ByteBuffer buffer) {
         run(Collections.singletonMap(name, buffer));
     }
 
     /**
-     * <p>Run this model after copying non-empty buffers to the specified variables. It copies the content
+     * <p>Run this model after assigning non-empty buffers to the specified variables. It copies the content
      * ranging from <code>position()</code> to <code>(limit() - 1)</code> without changing them, even if
      * the <code>buffer</code> is direct unlike {@link ModelRunnerBuilder#attach(String, ByteBuffer)}.</p>
      *
@@ -116,7 +116,6 @@ public class ModelRunner implements AutoCloseable {
      * the native byte order of your platform may differ from JVM.</p>
      *
      * @param buffers the buffers to be copied to the variables
-     * @return the output variables of the model
      */
     public void run(final Map<String, ByteBuffer> buffers) {
         assignToVariables(buffers);
