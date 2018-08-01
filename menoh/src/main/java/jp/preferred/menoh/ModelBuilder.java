@@ -73,16 +73,17 @@ public class ModelBuilder implements AutoCloseable {
      *
      * @param variableName the name of the variable
      * @param buffer the byte buffer from which to copy
+     * @return this object
      *
      * @throws IllegalArgumentException if <code>buffer</code> is null or empty
      */
-    public void attach(String variableName, ByteBuffer buffer) throws MenohException {
+    public ModelBuilder attach(String variableName, ByteBuffer buffer) throws MenohException {
         final Pointer bufferHandle = copyToNativeMemory(buffer);
         synchronized (this) {
             attachedBuffers.add(bufferHandle);
         }
 
-        attachImpl(variableName, bufferHandle);
+        return attachImpl(variableName, bufferHandle);
     }
 
     /**
@@ -91,11 +92,12 @@ public class ModelBuilder implements AutoCloseable {
      *
      * @param variableName the name of the variable
      * @param values the byte buffer from which to copy
+     * @return this object
      *
      * @throws IllegalArgumentException if <code>values</code> is null or empty
      */
-    public void attach(String variableName, float[] values) throws MenohException {
-        attach(variableName, values, 0, values.length);
+    public ModelBuilder attach(String variableName, float[] values) throws MenohException {
+        return attach(variableName, values, 0, values.length);
     }
 
     /**
@@ -106,21 +108,24 @@ public class ModelBuilder implements AutoCloseable {
      * @param values the byte buffer from which to copy
      * @param offset the array index from which to start copying
      * @param length the number of elements from <code>values</code> that must be copied
+     * @return this object
      *
      * @throws IllegalArgumentException if <code>values</code> is null or empty
      */
-    public void attach(String variableName, float[] values, int offset, int length) throws MenohException {
+    public ModelBuilder attach(String variableName, float[] values, int offset, int length) throws MenohException {
         final Pointer bufferHandle = copyToNativeMemory(values, offset, length);
         synchronized (this) {
             attachedBuffers.add(bufferHandle);
         }
 
-        attachImpl(variableName, bufferHandle);
+        return attachImpl(variableName, bufferHandle);
     }
 
-    private void attachImpl(String variableName, Pointer bufferHandle) throws MenohException {
+    private ModelBuilder attachImpl(String variableName, Pointer bufferHandle) throws MenohException {
         checkError(MenohNative.INSTANCE.menoh_model_builder_attach_external_buffer(
                 handle, variableName, bufferHandle));
+
+        return this;
     }
 
     /**

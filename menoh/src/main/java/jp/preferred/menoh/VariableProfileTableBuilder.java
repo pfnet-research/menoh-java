@@ -41,8 +41,10 @@ public class VariableProfileTableBuilder implements AutoCloseable {
 
     /**
      * Adds an input profile to configure the specified variable of the model.
+     *
+     * @return this object
      */
-    public void addInputProfile(String name, DType dtype, int[] dims) throws MenohException {
+    public VariableProfileTableBuilder addInputProfile(String name, DType dtype, int[] dims) throws MenohException {
         if (dims.length == 2) {
             checkError(
                     MenohNative.INSTANCE.menoh_variable_profile_table_builder_add_input_profile_dims_2(
@@ -56,14 +58,20 @@ public class VariableProfileTableBuilder implements AutoCloseable {
                     ErrorCode.UNDEFINED,
                     String.format("%s has an invalid dims size: %d (it must be 2 or 4)", name, dims.length));
         }
+
+        return this;
     }
 
     /**
      * Adds an output profile to configure the specified variable of the model.
+     *
+     * @return this object
      */
-    public void addOutputProfile(String name, DType dtype) throws MenohException {
+    public VariableProfileTableBuilder addOutputProfile(String name, DType dtype) throws MenohException {
         checkError(MenohNative.INSTANCE.menoh_variable_profile_table_builder_add_output_profile(
                 handle, name, dtype.getId()));
+
+        return this;
     }
 
     /**
