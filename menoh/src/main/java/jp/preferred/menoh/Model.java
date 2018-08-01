@@ -45,6 +45,16 @@ public class Model implements AutoCloseable {
     }
 
     /**
+     * Creates a {@link ModelBuilder}.
+     */
+    public static ModelBuilder builder(VariableProfileTable vpt) throws MenohException {
+        final PointerByReference ref = new PointerByReference();
+        checkError(MenohNative.INSTANCE.menoh_make_model_builder(vpt.nativeHandle(), ref));
+
+        return new ModelBuilder(ref.getValue());
+    }
+
+    /**
      * Returns a {@link Variable} with the specified name.
      */
     public Variable variable(String variableName) throws MenohException {

@@ -10,7 +10,7 @@ import java.nio.ByteOrder;
 
 import org.junit.jupiter.api.Test;
 
-public class ModelBuilderTest {
+public class ModelTest {
     @Test
     public void makeModelBuilderIsSuccessful() throws Exception {
         final String path = getResourceFilePath("models/and_op.onnx");
@@ -20,9 +20,11 @@ public class ModelBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim});
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
-                ModelBuilder modelBuilder = ModelBuilder.make(vpt)
+                ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
             modelBuilder.attach("input", inputData);
 
@@ -44,10 +46,12 @@ public class ModelBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim});
-                VariableProfileTable vpt = vptBuilder.build(modelData);
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile("output", DType.FLOAT);
+                VariableProfileTable vpt = vptBuilder.build(modelData)
         ) {
-            final ModelBuilder modelBuilder = ModelBuilder.make(vpt);
+            final ModelBuilder modelBuilder = Model.builder(vpt);
             try {
                 modelBuilder.attach("input", inputData);
 
@@ -82,9 +86,11 @@ public class ModelBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim});
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
-                ModelBuilder modelBuilder = ModelBuilder.make(vpt)
+                ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
             modelBuilder.attach("input", new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f});
             assertTrue(!modelBuilder.attachedBuffers().isEmpty(), "attachedBuffers should not be empty");
@@ -111,9 +117,11 @@ public class ModelBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim});
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
-                ModelBuilder modelBuilder = ModelBuilder.make(vpt)
+                ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
             modelBuilder.attach("input", input);
             assertTrue(!modelBuilder.attachedBuffers().isEmpty(), "attachedBuffers should not be empty");
@@ -156,10 +164,12 @@ public class ModelBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim});
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData)
         ) {
-            try (ModelBuilder modelBuilder = ModelBuilder.make(vpt)) {
+            try (ModelBuilder modelBuilder = Model.builder(vpt)) {
                 modelBuilder.attach("input", input);
                 assertTrue(!modelBuilder.attachedBuffers().isEmpty(), "attachedBuffers should not be empty");
 
@@ -196,9 +206,11 @@ public class ModelBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim});
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
-                ModelBuilder modelBuilder = ModelBuilder.make(vpt)
+                ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
             modelBuilder.attach("input", new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f});
 
@@ -227,9 +239,11 @@ public class ModelBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim});
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
-                ModelBuilder modelBuilder = ModelBuilder.make(vpt); // test case
+                ModelBuilder modelBuilder = Model.builder(vpt); // test case
                 Model model = modelBuilder.build(modelData, "mkldnn", "")
         ) {
             // you can delete modelData explicitly after building a model
@@ -286,9 +300,11 @@ public class ModelBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim});
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
-                ModelBuilder modelBuilder = makeModelBuilderWithInput(vpt, "input", inputDataBuf);
+                ModelBuilder modelBuilder = Model.builder(vpt).attach("input", inputDataBuf);
                 Model model = modelBuilder.build(modelData, "mkldnn", "")
         ) {
             // you can delete modelData explicitly after building a model
@@ -346,9 +362,11 @@ public class ModelBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim});
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
-                ModelBuilder modelBuilder = makeModelBuilderWithInput(vpt, "input", inputDataBuf);
+                ModelBuilder modelBuilder = Model.builder(vpt).attach("input", inputDataBuf);
                 Model model = modelBuilder.build(modelData, "mkldnn", "")
         ) {
             // you can delete modelData explicitly after building a model
@@ -393,9 +411,11 @@ public class ModelBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim});
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
-                ModelBuilder modelBuilder = makeModelBuilderWithInput(vpt, "input", readOnlyInputDataBuf);
+                ModelBuilder modelBuilder = Model.builder(vpt).attach("input", readOnlyInputDataBuf);
                 Model model = modelBuilder.build(modelData, "mkldnn", "")
         ) {
             // you can delete modelData explicitly after building a model
@@ -436,9 +456,11 @@ public class ModelBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim});
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
-                ModelBuilder modelBuilder = makeModelBuilderWithInput(vpt, "input", inputData);
+                ModelBuilder modelBuilder = Model.builder(vpt).attach("input", inputData);
                 Model model = modelBuilder.build(modelData, "mkldnn", "")
         ) {
             // you can delete modelData explicitly after building a model

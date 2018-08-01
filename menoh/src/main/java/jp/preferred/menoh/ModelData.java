@@ -21,9 +21,13 @@ public class ModelData implements AutoCloseable {
 
     /**
      * Optimizes this model data.
+     *
+     * @return this object
      */
-    public void optimize(VariableProfileTable vpt) throws MenohException {
+    public ModelData optimize(VariableProfileTable vpt) throws MenohException {
         checkError(MenohNative.INSTANCE.menoh_model_data_optimize(handle, vpt.nativeHandle()));
+
+        return this;
     }
 
     @Override

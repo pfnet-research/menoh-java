@@ -7,10 +7,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-public class VariableProfileTableBuilderTest {
+public class VariableProfileTableTest {
     @Test
     public void makeVptBuilderIsSuccessful() {
-        final VariableProfileTableBuilder builder = VariableProfileTableBuilder.make();
+        final VariableProfileTableBuilder builder = VariableProfileTable.builder();
         try {
             assertNotNull(builder.nativeHandle());
         } finally {
@@ -24,14 +24,14 @@ public class VariableProfileTableBuilderTest {
 
     @Test
     public void addValidInputProfile() {
-        try (VariableProfileTableBuilder builder = VariableProfileTableBuilder.make()) {
+        try (VariableProfileTableBuilder builder = VariableProfileTable.builder()) {
             builder.addInputProfile("foo", DType.FLOAT, new int[] {1, 1});
         }
     }
 
     @Test
     public void addValidInputProfileWithInvalidDims() {
-        try (VariableProfileTableBuilder builder = VariableProfileTableBuilder.make()) {
+        try (VariableProfileTableBuilder builder = VariableProfileTable.builder()) {
             MenohException e = assertThrows(MenohException.class,
                     // test case: dims.length == 1
                     () -> builder.addInputProfile("foo", DType.FLOAT, new int[] {1, 1, 1, 1, 1}));
@@ -45,7 +45,7 @@ public class VariableProfileTableBuilderTest {
 
     @Test
     public void addValidOutputProfile() {
-        try (VariableProfileTableBuilder builder = VariableProfileTableBuilder.make()) {
+        try (VariableProfileTableBuilder builder = VariableProfileTable.builder()) {
             builder.addOutputProfile("foo", DType.FLOAT);
         }
     }
@@ -59,7 +59,9 @@ public class VariableProfileTableBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim});
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData)
         ) {
             assertNotNull(vpt.nativeHandle());
@@ -87,7 +89,9 @@ public class VariableProfileTableBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim});
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData)
         ) {
             assertNotNull(vpt.nativeHandle());
@@ -114,7 +118,9 @@ public class VariableProfileTableBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder = makeVptBuilderForAndModel(new int[] {batchSize, inputDim})
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile("output", DType.FLOAT)
         ) {
             final VariableProfileTable vpt = vptBuilder.build(modelData);
             try {
@@ -140,9 +146,9 @@ public class VariableProfileTableBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder =
-                        makeVptBuilderForAndModel(
-                            inputProfileName, new int[] {batchSize, inputDim}, outputProfileName)
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile(inputProfileName, DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile(outputProfileName, DType.FLOAT)
         ) {
             MenohException e = assertThrows(MenohException.class, () -> vptBuilder.build(modelData));
             assertAll("input profile name not found",
@@ -165,9 +171,9 @@ public class VariableProfileTableBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder =
-                        makeVptBuilderForAndModel(
-                                inputProfileName, new int[] {batchSize, inputDim}, outputProfileName)
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile(inputProfileName, DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile(outputProfileName, DType.FLOAT)
         ) {
             MenohException e = assertThrows(MenohException.class, () -> vptBuilder.build(modelData));
             assertAll("mismatched input dims",
@@ -193,9 +199,9 @@ public class VariableProfileTableBuilderTest {
 
         try (
                 ModelData modelData = ModelData.makeFromOnnx(path);
-                VariableProfileTableBuilder vptBuilder =
-                        makeVptBuilderForAndModel(
-                            inputProfileName, new int[] {batchSize, inputDim}, outputProfileName)
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile(inputProfileName, DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputProfile(outputProfileName, DType.FLOAT)
         ) {
             MenohException e = assertThrows(MenohException.class, () -> vptBuilder.build(modelData));
             assertAll("output profile name not found",
