@@ -66,7 +66,7 @@ public class ModelBuilder implements AutoCloseable {
      *
      * @throws IllegalArgumentException if <code>buffer</code> is null or empty
      */
-    public ModelBuilder attach(String variableName, ByteBuffer buffer) throws MenohException {
+    public ModelBuilder attachExternalBuffer(String variableName, ByteBuffer buffer) throws MenohException {
         final Pointer bufferHandle = copyToNativeMemory(buffer);
         synchronized (this) {
             externalBuffers.add(bufferHandle);
@@ -87,8 +87,8 @@ public class ModelBuilder implements AutoCloseable {
      *
      * @throws IllegalArgumentException if <code>values</code> is null or empty
      */
-    public ModelBuilder attach(String variableName, float[] values) throws MenohException {
-        return attach(variableName, values, 0, values.length);
+    public ModelBuilder attachExternalBuffer(String variableName, float[] values) throws MenohException {
+        return attachExternalBuffer(variableName, values, 0, values.length);
     }
 
     /**
@@ -106,7 +106,8 @@ public class ModelBuilder implements AutoCloseable {
      *
      * @throws IllegalArgumentException if <code>values</code> is null or empty
      */
-    public ModelBuilder attach(String variableName, float[] values, int offset, int length) throws MenohException {
+    public ModelBuilder attachExternalBuffer(
+            String variableName, float[] values, int offset, int length) throws MenohException {
         final Pointer bufferHandle = copyToNativeMemory(values, offset, length);
         synchronized (this) {
             externalBuffers.add(bufferHandle);

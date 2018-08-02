@@ -2,7 +2,6 @@ package jp.preferred.menoh;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -67,7 +66,7 @@ public class ModelRunnerBuilder implements AutoCloseable {
         vptBuilder.close();
         modelData.close();
 
-        // allow the attached buffers to GC its allocated memory
+        // allow the attached external buffers to GC its allocated memory
         externalBuffers.clear();
     }
 
@@ -109,7 +108,7 @@ public class ModelRunnerBuilder implements AutoCloseable {
      *
      * @throws IllegalArgumentException if <code>buffer</code> is null or empty
      */
-    public ModelRunnerBuilder attach(String variableName, ByteBuffer buffer) throws MenohException {
+    public ModelRunnerBuilder attachExternalBuffer(String variableName, ByteBuffer buffer) throws MenohException {
         externalBuffers.put(variableName, buffer);
         return this;
     }
@@ -126,8 +125,8 @@ public class ModelRunnerBuilder implements AutoCloseable {
      *
      * @throws IllegalArgumentException if <code>values</code> is null or empty
      */
-    public ModelRunnerBuilder attach(String variableName, float[] values) throws MenohException {
-        return attach(variableName, values, 0, values.length);
+    public ModelRunnerBuilder attachExternalBuffer(String variableName, float[] values) throws MenohException {
+        return attachExternalBuffer(variableName, values, 0, values.length);
     }
 
     /**
@@ -145,7 +144,7 @@ public class ModelRunnerBuilder implements AutoCloseable {
      *
      * @throws IllegalArgumentException if <code>values</code> is null or empty
      */
-    public ModelRunnerBuilder attach(
+    public ModelRunnerBuilder attachExternalBuffer(
             String variableName,
             float[] values,
             int offset,
@@ -170,7 +169,7 @@ public class ModelRunnerBuilder implements AutoCloseable {
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
             for (Map.Entry<String, ByteBuffer> e : externalBuffers.entrySet()) {
-                modelBuilder.attach(e.getKey(), e.getValue());
+                modelBuilder.attachExternalBuffer(e.getKey(), e.getValue());
             }
 
             // reduce the memory footprint of

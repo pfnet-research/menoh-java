@@ -87,7 +87,8 @@ public class ModelRunner implements AutoCloseable {
     /**
      * <p>Run this model after assigning a non-empty buffer to the specified variable. It copies the content
      * ranging from <code>position()</code> to <code>(limit() - 1)</code> without changing them, even if
-     * the <code>buffer</code> is direct unlike {@link ModelRunnerBuilder#attach(String, ByteBuffer)}.</p>
+     * the <code>buffer</code> is direct unlike {@link ModelRunnerBuilder#attachExternalBuffer(String, ByteBuffer)}.
+     * </p>
      *
      * <p>Note that the <code>order()</code> of the buffer should be {@link ByteOrder#nativeOrder()} because
      * the native byte order of your platform may differ from JVM.</p>
@@ -102,7 +103,8 @@ public class ModelRunner implements AutoCloseable {
     /**
      * <p>Run this model after assigning non-empty buffers to the specified variables. It copies the content
      * ranging from <code>position()</code> to <code>(limit() - 1)</code> without changing them, even if
-     * the <code>buffer</code> is direct unlike {@link ModelRunnerBuilder#attach(String, ByteBuffer)}.</p>
+     * the <code>buffer</code> is direct unlike {@link ModelRunnerBuilder#attachExternalBuffer(String, ByteBuffer)}.
+     * </p>
      *
      * <p>Note that the <code>order()</code> of the buffer should be {@link ByteOrder#nativeOrder()} because
      * the native byte order of your platform may differ from JVM.</p>

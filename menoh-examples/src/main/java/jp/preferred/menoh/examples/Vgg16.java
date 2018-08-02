@@ -64,13 +64,7 @@ public class Vgg16 {
                         .addOutputProfile(fc6OutName, DType.FLOAT)
                         .addOutputProfile(softmaxOutName, DType.FLOAT)
 
-                        // Make ModelBuilder and attach extenal memory buffer
-                        // Variables which are not attached external memory buffer here are attached
-                        // internal memory buffers which are automatically allocated
-                        .attach(conv11InName, imageData)
-
-                        // Build model
-
+                        // Configure backend
                         .backendName("mkldnn")
                         .backendConfig("");
                  ModelRunner modelRunner = modelRunnerBuilder.build()
@@ -79,7 +73,7 @@ public class Vgg16 {
             modelRunnerBuilder.close();
 
             // Run the inference
-            modelRunner.run();
+            modelRunner.run(conv11InName, imageData);
 
             final Model model = modelRunner.model();
 

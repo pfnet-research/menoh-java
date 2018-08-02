@@ -24,7 +24,7 @@ public class ModelRunnerTest {
                         .fromOnnxFile(path)
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT)
-                        .attach("input", inputData1)
+                        .attachExternalBuffer("input", inputData1)
                         .backendName("mkldnn")
                         .backendConfig("");
                  ModelRunner runner = builder.build()
@@ -41,7 +41,7 @@ public class ModelRunnerTest {
                     () -> assertEquals("mkldnn", builder.backendName()),
                     () -> assertEquals("", builder.backendConfig())
             );
-            assertAll("attached buffers in builder",
+            assertAll("attached external buffers in builder",
                     () -> assertNotNull(builder.externalBuffers()),
                     () -> assertNotNull(builder.externalBuffers().get("input"))
             );
@@ -89,7 +89,7 @@ public class ModelRunnerTest {
                 .fromOnnxFile(path)
                 .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                 .addOutputProfile("output", DType.FLOAT)
-                .attach("input", inputData)
+                .attachExternalBuffer("input", inputData)
                 .backendName("mkldnn")
                 .backendConfig("");
         final ModelRunner runner = builder.build();
@@ -107,7 +107,7 @@ public class ModelRunnerTest {
                     () -> assertEquals("mkldnn", builder.backendName()),
                     () -> assertEquals("", builder.backendConfig())
             );
-            assertAll("attached buffers in builder",
+            assertAll("attached external buffers in builder",
                     () -> assertNotNull(builder.externalBuffers()),
                     () -> assertNotNull(builder.externalBuffers().get("input"))
             );
@@ -127,7 +127,7 @@ public class ModelRunnerTest {
                     () -> assertNotNull(builder.vptBuilder()),
                     () -> assertNull(builder.vptBuilder().nativeHandle())
             );
-            assertAll("attached buffers in builder",
+            assertAll("attached external buffers in builder",
                     () -> assertNotNull(builder.externalBuffers()),
                     () -> assertTrue(builder.externalBuffers().isEmpty(),
                             "externalBuffers should be empty")
