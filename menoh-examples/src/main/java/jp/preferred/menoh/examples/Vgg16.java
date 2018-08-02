@@ -1,5 +1,6 @@
 package jp.preferred.menoh.examples;
 
+import com.sun.jna.NativeLibrary;
 import jp.preferred.menoh.*;
 
 import java.awt.Graphics2D;
@@ -19,100 +20,102 @@ import javax.imageio.ImageIO;
 
 public class Vgg16 {
     public static void main(String[] args) throws Exception {
-        System.out.println("Working Directory = " + System.getProperty("user.dir"));
-
-        String conv11InName = "140326425860192";
-        String fc6OutName = "140326200777584";
-        String softmaxOutName = "140326200803680";
-
-        int batchSize = 1;
-        int channelNum = 3;
-        int height = 224;
-        int width = 224;
-
         if (args.length <= 0) {
             System.err.println("You must specify a filename of the input image in the argument.");
             System.exit(1);
         }
 
+        System.err.println("Working Directory = " + System.getProperty("user.dir"));
+        if (Boolean.getBoolean("jna.debug_load")) {
+            NativeLibrary.getProcess(); // trick to initialize `NativeLibrary` explicitly in this place
+            System.err.println("jna.library.path: " + System.getProperty("jna.library.path"));
+            System.err.println("jna.platform.library.path: " + System.getProperty("jna.platform.library.path"));
+        }
+
+        final String conv11InName = "140326425860192";
+        final String fc6OutName = "140326200777584";
+        final String softmaxOutName = "140326200803680";
+
+        final int batchSize = 1;
+        final int channelNum = 3;
+        final int height = 224;
+        final int width = 224;
+
         final String inputImagePath = args[0];
         final String onnxModelPath = getResourceFilePath("data/VGG16.onnx");
         final String synsetWordsPath = getResourceFilePath("data/synset_words.txt");
 
-        BufferedImage image = ImageIO.read(new File(inputImagePath));
-
+        // Read and pre-process an input
+        final BufferedImage image = ImageIO.read(new File(inputImagePath));
         if (image == null) {
             throw new Exception("Invalid input image path: " + inputImagePath);
         }
+        final float[] imageData = renderToNctw(cropAndResize(image, width, height));
 
-        image = cropAndResize(image, width, height);
-
-        float[] imageData = renderToNctw(image);
-
+        // Note: You must `close()` the runner and builder to free the native memory explicitly
         try (
-                // The runner and builder must be closed explicitly to free the objects in the native memory
                 ModelRunnerBuilder modelRunnerBuilder = ModelRunner
-                    // Load ONNX model data
-                    .fromOnnxFile(onnxModelPath)
+                        // Load ONNX model data
+                        .fromOnnxFile(onnxModelPath)
 
-                    // Define input profile (name, dtype, dims) and output profile (name, dtype)
-                    // dims of output is automatically calculated later
-                    .addInputProfile(conv11InName, DType.FLOAT, new int[]{batchSize, channelNum, height, width})
-                    .addOutputProfile(fc6OutName, DType.FLOAT)
-                    .addOutputProfile(softmaxOutName, DType.FLOAT)
+                        // Define input profile (name, dtype, dims) and output profile (name, dtype)
+                        // dims of output is automatically calculated later
+                        .addInputProfile(conv11InName, DType.FLOAT, new int[]{batchSize, channelNum, height, width})
+                        .addOutputProfile(fc6OutName, DType.FLOAT)
+                        .addOutputProfile(softmaxOutName, DType.FLOAT)
 
-                    // Make ModelBuilder and attach extenal memory buffer
-                    // Variables which are not attached external memory buffer here are attached
-                    // internal memory buffers which are automatically allocated
-                    .attach(conv11InName, imageData)
+                        // Make ModelBuilder and attach extenal memory buffer
+                        // Variables which are not attached external memory buffer here are attached
+                        // internal memory buffers which are automatically allocated
+                        .attach(conv11InName, imageData)
 
-                    // Build model
-                    .backendName("mkldnn").backendConfig("");
+                        // Build model
+
+                        .backendName("mkldnn")
+                        .backendConfig("");
                  ModelRunner modelRunner = modelRunnerBuilder.build()
         ) {
             // modelRunnerBuilder can be deleted explicitly after building a model
             modelRunnerBuilder.close();
 
-            final Model model = modelRunner.model();
+            // Run the inference
             modelRunner.run();
 
-            // Get buffer pointer of output
-            ByteBuffer fc6OutputBuff = model.variable(fc6OutName).buffer();
-            ByteBuffer softmaxOutputBuff = model.variable(softmaxOutName).buffer();
+            final Model model = modelRunner.model();
+
+            // Get output buffers
+            final ByteBuffer fc6OutputBuff = model.variable(fc6OutName).buffer();
+            final ByteBuffer softmaxOutputBuff = model.variable(softmaxOutName).buffer();
 
             // Get output
-            FloatBuffer fc6OutputFloatBuff = fc6OutputBuff.asFloatBuffer();
+            final FloatBuffer fc6OutputFloatBuff = fc6OutputBuff.asFloatBuffer();
             for (int i = 0; i < 10; i++) {
                 System.out.print(Float.toString(fc6OutputFloatBuff.get(i)) + " ");
             }
             System.out.println();
 
-            String[] categories = loadCategoryList(synsetWordsPath);
-            int topK = 5;
+            final int[] softmaxDims = model.variable(softmaxOutName).dims();
 
-            // Note: softmaxOutputBuff.array() is not available because it is a direct buffer
-            int[] softmaxDims = model.variable(softmaxOutName).dims();
-            float[] scoreArray = new float[softmaxDims[1]];
-            softmaxOutputBuff.asFloatBuffer().get(scoreArray);
+            // Note: use `get()` instead of `array()` because it is a direct buffer
+            final float[] scores = new float[softmaxDims[1]];
+            softmaxOutputBuff.asFloatBuffer().get(scores);
 
-            int[] topKIndexList = extractTopKIndexList(
-                    scoreArray,
-                    0,
-                    softmaxDims[1],
-                    topK);
+            final int topK = 5;
+            final List<String> categories = loadCategories(synsetWordsPath);
 
             System.out.println("top " + topK + "  categories are");
 
-            for (int ki : topKIndexList) {
-                System.out.println(ki + " " + scoreArray[ki] + "  categories are" + categories[ki]);
+            final List<Score> topKIndices = extractTopKIndices(scores, 0, softmaxDims[1], topK);
+            for (Score s : topKIndices) {
+                int ki = s.index;
+                System.out.println("index: " + ki + ", score: " + scores[ki] + ", category: " + categories.get(ki));
             }
         }
     }
 
-
     private static String getResourceFilePath(String name) throws IOException, URISyntaxException {
         // ref. https://stackoverflow.com/a/17870390/1014818
-        URL url = Vgg16.class.getClassLoader().getResource(name);
+        final URL url = Vgg16.class.getClassLoader().getResource(name);
         if (url != null) {
             return Paths.get(url.toURI()).toFile().getCanonicalPath();
         } else {
@@ -121,65 +124,70 @@ public class Vgg16 {
     }
 
     private static BufferedImage resizeImage(BufferedImage image, int width, int height) {
-        BufferedImage destImage = new BufferedImage(width, height, image.getType());
-        Graphics2D g = destImage.createGraphics();
+        final BufferedImage destImage = new BufferedImage(width, height, image.getType());
+        final Graphics2D g = destImage.createGraphics();
         g.drawImage(image, 0, 0, width, height, null);
         g.dispose();
+
         return destImage;
     }
 
     private static BufferedImage cropAndResize(BufferedImage image, int width, int height) {
-        int shortEdge = Math.min(image.getWidth(), image.getHeight());
-        int x0 = (image.getWidth() - shortEdge) / 2;
-        int y0 = (image.getHeight() - shortEdge) / 2;
-        int width0 = shortEdge;
-        int height0 = shortEdge;
+        final int shortEdge = Math.min(image.getWidth(), image.getHeight());
+        final int x0 = (image.getWidth() - shortEdge) / 2;
+        final int y0 = (image.getHeight() - shortEdge) / 2;
+        final int width0 = shortEdge;
+        final int height0 = shortEdge;
+
         BufferedImage cropped = image.getSubimage(x0, y0, width0, height0);
         BufferedImage resized = resizeImage(cropped, width, height);
+
         return resized;
     }
 
 
     private static float[] renderToNctw(BufferedImage image) {
-        int channels = 3;
+        final int height = image.getHeight();
+        final int width = image.getWidth();
+        final int channelSize = 3;
+        final float[] data = new float[channelSize * image.getWidth() * image.getHeight()];
 
-        float[] data = new float[channels * image.getWidth() * image.getHeight()];
+        final Raster raster = image.getData();
+        final int[] buf = new int[channelSize];
 
-        Raster raster = image.getData();
-        int[] temp = new int[channels];
-
-        for (int y = 0; y < image.getHeight(); ++y) {
-            for (int x = 0; x < image.getWidth(); ++x) {
-                raster.getPixel(x, y, temp);
-                data[0 * (image.getHeight() * image.getWidth()) + y * image.getWidth() + x] = temp[2];
-                data[1 * (image.getHeight() * image.getWidth()) + y * image.getWidth() + x] = temp[1];
-                data[2 * (image.getHeight() * image.getWidth()) + y * image.getWidth() + x] = temp[0];
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                raster.getPixel(x, y, buf);
+                data[0 * (height * width) + y * width + x] = buf[2];
+                data[1 * (height * width) + y * width + x] = buf[1];
+                data[2 * (height * width) + y * width + x] = buf[0];
             }
         }
 
         return data;
     }
 
-    static class ScoreIndex {
-        float score;
-        int index;
+    static class Score {
+        final int index;
+        final float score;
+
+        public Score(int index, float score) {
+            this.index = index;
+            this.score = score;
+        }
     }
 
-    private static int[] extractTopKIndexList(float[] floatArray, int first, int last, int k) {
-        List<ScoreIndex> q = new ArrayList<>(0);
-
-        for (int i = first; i != last; i++) {
-            ScoreIndex sc = new ScoreIndex();
-            sc.score = floatArray[i];
-            sc.index = i;
-            q.add(sc);
+    private static List<Score> extractTopKIndices(float[] scores, int offset, int length, int k) {
+        final List<Score> q = new ArrayList<>();
+        for (int i = offset; i < offset + length; i++) {
+            q.add(new Score(i, scores[i]));
         }
 
         Collections.sort(
                 q,
-                new Comparator<ScoreIndex>() {
+                new Comparator<Score>() {
                     @Override
-                    public int compare(ScoreIndex obj1, ScoreIndex obj2) {
+                    public int compare(Score obj1, Score obj2) {
                         if (obj1.score < obj2.score) {
                             return 1;
                         } else if (obj1.score > obj2.score) {
@@ -190,28 +198,18 @@ public class Vgg16 {
                 }
         );
 
-        int[] tops = new int[k];
-
-        for (int i = 0; i < k; i++) {
-            tops[i] = q.get(i).index;
-        }
-
-        return tops;
+        return q.subList(0, 5);
     }
 
-    private static String[] loadCategoryList(String synsetWordsPath) throws IOException {
-        List<String> ret = new ArrayList<>(0);
-        FileReader fr = new FileReader(synsetWordsPath);
-        BufferedReader br = new BufferedReader(fr);
-
-        String str = br.readLine();
-        while (str != null) {
-            ret.add(str);
-            str = br.readLine();
+    private static List<String> loadCategories(String synsetWordsPath) throws IOException {
+        final List<String> ret = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(synsetWordsPath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                ret.add(line);
+            }
         }
 
-        br.close();
-
-        return ret.toArray(new String[0]);
+        return ret;
     }
 }

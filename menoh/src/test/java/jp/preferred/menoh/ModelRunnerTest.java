@@ -42,8 +42,8 @@ public class ModelRunnerTest {
                     () -> assertEquals("", builder.backendConfig())
             );
             assertAll("attached buffers in builder",
-                    () -> assertNotNull(builder.attachedBuffers()),
-                    () -> assertNotNull(builder.attachedBuffers().get("input"))
+                    () -> assertNotNull(builder.externalBuffers()),
+                    () -> assertNotNull(builder.externalBuffers().get("input"))
             );
 
             assertAll("model in runner",
@@ -108,8 +108,8 @@ public class ModelRunnerTest {
                     () -> assertEquals("", builder.backendConfig())
             );
             assertAll("attached buffers in builder",
-                    () -> assertNotNull(builder.attachedBuffers()),
-                    () -> assertNotNull(builder.attachedBuffers().get("input"))
+                    () -> assertNotNull(builder.externalBuffers()),
+                    () -> assertNotNull(builder.externalBuffers().get("input"))
             );
 
             assertNotNull(runner);
@@ -128,9 +128,9 @@ public class ModelRunnerTest {
                     () -> assertNull(builder.vptBuilder().nativeHandle())
             );
             assertAll("attached buffers in builder",
-                    () -> assertNotNull(builder.attachedBuffers()),
-                    () -> assertTrue(builder.attachedBuffers().isEmpty(),
-                            "attachedBuffers should be empty")
+                    () -> assertNotNull(builder.externalBuffers()),
+                    () -> assertTrue(builder.externalBuffers().isEmpty(),
+                            "externalBuffers should be empty")
             );
 
             runner.close();

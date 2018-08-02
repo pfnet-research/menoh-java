@@ -2,6 +2,7 @@ package jp.preferred.menoh;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -16,19 +17,19 @@ public class ModelRunnerBuilder implements AutoCloseable {
 
     private String backendConfig;
 
-    private final Map<String, ByteBuffer> attachedBuffers;
+    private final Map<String, ByteBuffer> externalBuffers;
 
     ModelRunnerBuilder(
             ModelData modelData,
             VariableProfileTableBuilder vptBuilder,
             String backendName,
             String backendConfig,
-            Map<String, ByteBuffer> attachedBuffers) {
+            Map<String, ByteBuffer> externalBuffers) {
         this.modelData = modelData;
         this.vptBuilder = vptBuilder;
         this.backendName = backendName;
         this.backendConfig = backendConfig;
-        this.attachedBuffers = attachedBuffers;
+        this.externalBuffers = externalBuffers;
     }
 
     ModelData modelData() {
@@ -39,7 +40,7 @@ public class ModelRunnerBuilder implements AutoCloseable {
         return this.vptBuilder;
     }
 
-    String backendName() {
+    public String backendName() {
         return this.backendName;
     }
 
@@ -48,7 +49,7 @@ public class ModelRunnerBuilder implements AutoCloseable {
         return this;
     }
 
-    String backendConfig() {
+    public String backendConfig() {
         return this.backendConfig;
     }
 
@@ -57,8 +58,8 @@ public class ModelRunnerBuilder implements AutoCloseable {
         return this;
     }
 
-    Map<String, ByteBuffer> attachedBuffers() {
-        return this.attachedBuffers;
+    Map<String, ByteBuffer> externalBuffers() {
+        return this.externalBuffers;
     }
 
     @Override
@@ -67,7 +68,7 @@ public class ModelRunnerBuilder implements AutoCloseable {
         modelData.close();
 
         // allow the attached buffers to GC its allocated memory
-        attachedBuffers.clear();
+        externalBuffers.clear();
     }
 
     /**
@@ -91,14 +92,13 @@ public class ModelRunnerBuilder implements AutoCloseable {
     }
 
     /**
-     * <p>Attaches a non-empty buffer to the specified variable.</p>
+     * <p>Attaches a non-empty external buffer to the specified variable.</p>
      *
-     * <p>If the <code>buffer</code> is direct, it will be attached to the model directly without copying.
-     * You can <code>run()</code> the model again and again by updating the attached buffer instead of
-     * rebuilding the model.</p>
+     * <p>If the specified <code>buffer</code> is direct, it will be attached to the model directly without
+     * copying. Otherwise, it copies the content to a newly allocated buffer in the native heap ranging from
+     * <code>position()</code> to <code>(limit() - 1)</code> without changing its position.</p>
      *
-     * <p>Otherwise, it copies the content of the buffer to an allocated memory in the native heap ranging
-     * from <code>position()</code> to <code>(limit() - 1)</code> without changing them.</p>
+     * <p>The buffer can be accessed through {@link Model#variable(String)}.</p>
      *
      * <p>Note that the <code>order()</code> of the buffer should be {@link ByteOrder#nativeOrder()} because
      * the native byte order of your platform may differ from JVM.</p>
@@ -110,13 +110,15 @@ public class ModelRunnerBuilder implements AutoCloseable {
      * @throws IllegalArgumentException if <code>buffer</code> is null or empty
      */
     public ModelRunnerBuilder attach(String variableName, ByteBuffer buffer) throws MenohException {
-        attachedBuffers.put(variableName, buffer);
+        externalBuffers.put(variableName, buffer);
         return this;
     }
 
     /**
-     * <p>Attaches a non-empty array to the specified variable. It copies the content of the array to an allocated
-     * memory in the native heap.</p>
+     * <p>Attaches a non-empty external buffer to the specified variable. It also copies the content of the
+     * <code>values</code> to a newly allocated buffer in the native heap.</p>
+
+     * <p>The buffer can be accessed through {@link Model#variable(String)}.</p>
      *
      * @param variableName the name of the variable
      * @param values the byte buffer from which to copy
@@ -129,8 +131,11 @@ public class ModelRunnerBuilder implements AutoCloseable {
     }
 
     /**
-     * <p>Attaches a non-empty array to the specified variable. It copies the content of the array to an allocated
-     * memory in the native heap ranging from <code>offset</code> to <code>(offset + length - 1)</code>.</p>
+     * <p>Attaches a non-empty external buffer to the specified variable. It also copies the content of the
+     * <code>values</code> to a newly allocated buffer in the native heap ranging from <code>offset</code>
+     * to <code>(offset + length - 1)</code>.</p>
+     *
+     * <p>The buffer can be accessed through {@link Model#variable(String)}.</p>
      *
      * @param variableName the name of the variable
      * @param values the byte buffer from which to copy
@@ -149,7 +154,7 @@ public class ModelRunnerBuilder implements AutoCloseable {
         final ByteBuffer buffer = ByteBuffer.allocateDirect(length * 4).order(ByteOrder.nativeOrder());
         buffer.asFloatBuffer().put(values, offset, length);
 
-        attachedBuffers.put(variableName, buffer);
+        externalBuffers.put(variableName, buffer);
         return this;
     }
 
@@ -164,9 +169,12 @@ public class ModelRunnerBuilder implements AutoCloseable {
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
-            for (Map.Entry<String, ByteBuffer> e : attachedBuffers.entrySet()) {
+            for (Map.Entry<String, ByteBuffer> e : externalBuffers.entrySet()) {
                 modelBuilder.attach(e.getKey(), e.getValue());
             }
+
+            // reduce the memory footprint of
+            modelData.optimize(vpt);
 
             final Model model = modelBuilder.build(modelData, backendName, backendConfig);
             return new ModelRunner(model);

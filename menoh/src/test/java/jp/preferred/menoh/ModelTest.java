@@ -30,9 +30,9 @@ public class ModelTest {
 
             assertAll("model builder",
                     () -> assertNotNull(modelBuilder.nativeHandle()),
-                    () -> assertNotNull(modelBuilder.attachedBuffers()),
-                    () -> assertTrue(!modelBuilder.attachedBuffers().isEmpty(),
-                            "attachedBuffers should not be empty")
+                    () -> assertNotNull(modelBuilder.externalBuffers()),
+                    () -> assertTrue(!modelBuilder.externalBuffers().isEmpty(),
+                            "externalBuffers should not be empty")
             );
         }
     }
@@ -57,17 +57,17 @@ public class ModelTest {
 
                 assertAll("model builder",
                         () -> assertNotNull(modelBuilder.nativeHandle()),
-                        () -> assertNotNull(modelBuilder.attachedBuffers()),
-                        () -> assertTrue(!modelBuilder.attachedBuffers().isEmpty(),
-                                "attachedBuffers should not be empty")
+                        () -> assertNotNull(modelBuilder.externalBuffers()),
+                        () -> assertTrue(!modelBuilder.externalBuffers().isEmpty(),
+                                "externalBuffers should not be empty")
                 );
             } finally {
                 modelBuilder.close();
                 assertAll("model builder",
                         () -> assertNull(modelBuilder.nativeHandle()),
-                        () -> assertNotNull(modelBuilder.attachedBuffers()),
-                        () -> assertTrue(modelBuilder.attachedBuffers().isEmpty(),
-                                "attachedBuffers should be empty")
+                        () -> assertNotNull(modelBuilder.externalBuffers()),
+                        () -> assertTrue(modelBuilder.externalBuffers().isEmpty(),
+                                "externalBuffers should be empty")
                 );
 
                 // close() is an idempotent operation
@@ -93,14 +93,14 @@ public class ModelTest {
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
             modelBuilder.attach("input", new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f});
-            assertTrue(!modelBuilder.attachedBuffers().isEmpty(), "attachedBuffers should not be empty");
+            assertTrue(!modelBuilder.externalBuffers().isEmpty(), "externalBuffers should not be empty");
 
             try (Model model = modelBuilder.build(modelData, backendName, backendConfig)) {
                 assertAll("model",
                         () -> assertNotNull(model.nativeHandle()),
                         () -> assertNotNull(model.attachedBuffers()),
                         () -> assertArrayEquals(
-                                modelBuilder.attachedBuffers().toArray(), model.attachedBuffers().toArray())
+                                modelBuilder.externalBuffers().toArray(), model.attachedBuffers().toArray())
                 );
             }
         }
@@ -124,7 +124,7 @@ public class ModelTest {
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
             modelBuilder.attach("input", input);
-            assertTrue(!modelBuilder.attachedBuffers().isEmpty(), "attachedBuffers should not be empty");
+            assertTrue(!modelBuilder.externalBuffers().isEmpty(), "externalBuffers should not be empty");
 
             final Model model = modelBuilder.build(modelData, backendName, backendConfig);
             try {
@@ -132,19 +132,19 @@ public class ModelTest {
                         () -> assertNotNull(model.nativeHandle()),
                         () -> assertNotNull(model.attachedBuffers()),
                         () -> assertArrayEquals(
-                                modelBuilder.attachedBuffers().toArray(), model.attachedBuffers().toArray())
+                                modelBuilder.externalBuffers().toArray(), model.attachedBuffers().toArray())
                 );
             } finally {
                 model.close();
                 assertAll("model",
                         () -> assertNull(model.nativeHandle()),
                         () -> assertNotNull(model.attachedBuffers()),
-                        () -> assertTrue(model.attachedBuffers().isEmpty(), "attachedBuffers should be empty")
+                        () -> assertTrue(model.attachedBuffers().isEmpty(), "externalBuffers should be empty")
                 );
                 assertAll("model builder",
-                        () -> assertNotNull(modelBuilder.attachedBuffers()),
-                        () -> assertTrue(!modelBuilder.attachedBuffers().isEmpty(),
-                                "attachedBuffers should not be empty")
+                        () -> assertNotNull(modelBuilder.externalBuffers()),
+                        () -> assertTrue(!modelBuilder.externalBuffers().isEmpty(),
+                                "externalBuffers should not be empty")
                 );
 
                 // close() is an idempotent operation
@@ -171,7 +171,7 @@ public class ModelTest {
         ) {
             try (ModelBuilder modelBuilder = Model.builder(vpt)) {
                 modelBuilder.attach("input", input);
-                assertTrue(!modelBuilder.attachedBuffers().isEmpty(), "attachedBuffers should not be empty");
+                assertTrue(!modelBuilder.externalBuffers().isEmpty(), "externalBuffers should not be empty");
 
                 final Model model = modelBuilder.build(modelData, backendName, backendConfig);
                 try {
@@ -179,15 +179,15 @@ public class ModelTest {
                     modelBuilder.close();
 
                     assertAll("model builder",
-                            () -> assertNotNull(modelBuilder.attachedBuffers()),
-                            () -> assertTrue(modelBuilder.attachedBuffers().isEmpty(),
-                                    "attachedBuffers should be empty")
+                            () -> assertNotNull(modelBuilder.externalBuffers()),
+                            () -> assertTrue(modelBuilder.externalBuffers().isEmpty(),
+                                    "externalBuffers should be empty")
                     );
                     assertAll("model",
                             () -> assertNotNull(model.nativeHandle()),
                             () -> assertNotNull(model.attachedBuffers()),
                             () -> assertTrue(!model.attachedBuffers().isEmpty(),
-                                    "attachedBuffers should not be empty")
+                                    "externalBuffers should not be empty")
                     );
                 } finally {
                     model.close();
