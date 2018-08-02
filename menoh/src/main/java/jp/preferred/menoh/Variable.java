@@ -37,10 +37,19 @@ public class Variable {
     }
 
     /**
-     * The length of buffer.
+     * A direct {@link ByteBuffer} which points to the native buffer of the variable. The buffer can be read
+     * and written via the methods of <code>ByteBuffer</code> before and after running the model.
      */
-    public long length() {
+    public ByteBuffer buffer() throws MenohException {
+        return this.bufferHandle.getByteBuffer(0, bufferLength());
+    }
+
+    /**
+     * The length of the buffer in bytes.
+     */
+    long bufferLength() {
         if (dims.length > 0) {
+            final long elementSize = dtype.size();
             long length = 1;
             for (int d : dims) {
                 length *= d;
@@ -50,21 +59,9 @@ public class Variable {
                 throw new MenohException(ErrorCode.UNDEFINED, "buffer is empty");
             }
 
-            return length;
+            return elementSize * length;
         } else {
             throw new MenohException(ErrorCode.UNDEFINED, "buffer is empty");
         }
-    }
-
-    /**
-     * A direct {@link ByteBuffer} which points to the native buffer of the variable. The buffer can be read
-     * and written via the methods of <code>ByteBuffer</code> before and after running the model.
-     */
-    public ByteBuffer buffer() throws MenohException {
-        final long offset = 0;
-        final long elementSize = dtype.size();
-        final long totalLength = elementSize * this.length();
-
-        return this.bufferHandle.getByteBuffer(offset, totalLength);
     }
 }

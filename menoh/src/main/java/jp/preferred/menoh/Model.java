@@ -6,7 +6,6 @@ import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,19 +17,19 @@ public class Model implements AutoCloseable {
     /**
      * A reference to the pointers to prevent them from getting garbage collected.
      */
-    private final List<Pointer> attachedBuffers;
+    private final List<Pointer> externalBuffers;
 
-    Model(Pointer handle, List<Pointer> attachedBuffers) {
+    Model(Pointer handle, List<Pointer> externalBuffers) {
         this.handle = handle;
-        this.attachedBuffers = attachedBuffers;
+        this.externalBuffers = externalBuffers;
     }
 
     Pointer nativeHandle() {
         return this.handle;
     }
 
-    List<Pointer> attachedBuffers() {
-        return this.attachedBuffers;
+    List<Pointer> externalBuffers() {
+        return this.externalBuffers;
     }
 
     @Override
@@ -39,7 +38,7 @@ public class Model implements AutoCloseable {
             if (handle != Pointer.NULL) {
                 MenohNative.INSTANCE.menoh_delete_model(handle);
                 handle = Pointer.NULL;
-                attachedBuffers.clear();
+                externalBuffers.clear();
             }
         }
     }
@@ -79,6 +78,9 @@ public class Model implements AutoCloseable {
         return new Variable(DType.valueOf(dtype.getValue()), dims, buffer.getValue());
     }
 
+    /**
+     * Run this model.
+     */
     public void run() throws MenohException {
         checkError(MenohNative.INSTANCE.menoh_model_run(handle));
     }

@@ -9,8 +9,11 @@ import java.nio.ByteOrder;
 
 class BufferUtils {
     /**
-     * <p>Copies a buffer to an allocated memory in the native heap. It copies the content ranging from
-     * <code>position()</code> to <code>(limit() - 1)</code> without changing them, except for a direct buffer.</p>
+     * <p>Copies a buffer to a native memory.</p>
+     *
+     * <p>If the <code>buffer</code> is direct, it will be attached to the model directly without copying.
+     * Otherwise, it copies the content of the buffer to a newly allocated memory in the native heap ranging
+     * from <code>position()</code> to <code>(limit() - 1)</code> without changing its position.</p>
      *
      * <p>Note that the <code>order()</code> of the buffer should be {@link ByteOrder#nativeOrder()} because
      * the native byte order of your platform may differ from JVM.</p>
@@ -53,7 +56,7 @@ class BufferUtils {
     }
 
     /**
-     * <p>Copies the array to an allocated memory in the native heap.</p>
+     * <p>Copies the array to a newly allocated memory in the native heap.</p>
      *
      * @param values the non-empty array from which to copy
      * @param offset the array index from which to start copying

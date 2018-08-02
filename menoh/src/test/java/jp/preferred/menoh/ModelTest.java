@@ -19,20 +19,20 @@ public class ModelTest {
         final float[] inputData = new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f};
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
-            modelBuilder.attach("input", inputData);
+            modelBuilder.attachExternalBuffer("input", inputData);
 
             assertAll("model builder",
                     () -> assertNotNull(modelBuilder.nativeHandle()),
-                    () -> assertNotNull(modelBuilder.attachedBuffers()),
-                    () -> assertTrue(!modelBuilder.attachedBuffers().isEmpty(),
-                            "attachedBuffers should not be empty")
+                    () -> assertNotNull(modelBuilder.externalBuffers()),
+                    () -> assertTrue(!modelBuilder.externalBuffers().isEmpty(),
+                            "externalBuffers should not be empty")
             );
         }
     }
@@ -45,7 +45,7 @@ public class ModelTest {
         final float[] inputData = new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f};
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
@@ -53,21 +53,21 @@ public class ModelTest {
         ) {
             final ModelBuilder modelBuilder = Model.builder(vpt);
             try {
-                modelBuilder.attach("input", inputData);
+                modelBuilder.attachExternalBuffer("input", inputData);
 
                 assertAll("model builder",
                         () -> assertNotNull(modelBuilder.nativeHandle()),
-                        () -> assertNotNull(modelBuilder.attachedBuffers()),
-                        () -> assertTrue(!modelBuilder.attachedBuffers().isEmpty(),
-                                "attachedBuffers should not be empty")
+                        () -> assertNotNull(modelBuilder.externalBuffers()),
+                        () -> assertTrue(!modelBuilder.externalBuffers().isEmpty(),
+                                "externalBuffers should not be empty")
                 );
             } finally {
                 modelBuilder.close();
                 assertAll("model builder",
                         () -> assertNull(modelBuilder.nativeHandle()),
-                        () -> assertNotNull(modelBuilder.attachedBuffers()),
-                        () -> assertTrue(modelBuilder.attachedBuffers().isEmpty(),
-                                "attachedBuffers should be empty")
+                        () -> assertNotNull(modelBuilder.externalBuffers()),
+                        () -> assertTrue(modelBuilder.externalBuffers().isEmpty(),
+                                "externalBuffers should be empty")
                 );
 
                 // close() is an idempotent operation
@@ -85,22 +85,22 @@ public class ModelTest {
         final String backendConfig = "";
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
-            modelBuilder.attach("input", new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f});
-            assertTrue(!modelBuilder.attachedBuffers().isEmpty(), "attachedBuffers should not be empty");
+            modelBuilder.attachExternalBuffer("input", new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f});
+            assertTrue(!modelBuilder.externalBuffers().isEmpty(), "externalBuffers should not be empty");
 
             try (Model model = modelBuilder.build(modelData, backendName, backendConfig)) {
                 assertAll("model",
                         () -> assertNotNull(model.nativeHandle()),
-                        () -> assertNotNull(model.attachedBuffers()),
+                        () -> assertNotNull(model.externalBuffers()),
                         () -> assertArrayEquals(
-                                modelBuilder.attachedBuffers().toArray(), model.attachedBuffers().toArray())
+                                modelBuilder.externalBuffers().toArray(), model.externalBuffers().toArray())
                 );
             }
         }
@@ -116,35 +116,35 @@ public class ModelTest {
         final String backendConfig = "";
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
-            modelBuilder.attach("input", input);
-            assertTrue(!modelBuilder.attachedBuffers().isEmpty(), "attachedBuffers should not be empty");
+            modelBuilder.attachExternalBuffer("input", input);
+            assertTrue(!modelBuilder.externalBuffers().isEmpty(), "externalBuffers should not be empty");
 
             final Model model = modelBuilder.build(modelData, backendName, backendConfig);
             try {
                 assertAll("model",
                         () -> assertNotNull(model.nativeHandle()),
-                        () -> assertNotNull(model.attachedBuffers()),
+                        () -> assertNotNull(model.externalBuffers()),
                         () -> assertArrayEquals(
-                                modelBuilder.attachedBuffers().toArray(), model.attachedBuffers().toArray())
+                                modelBuilder.externalBuffers().toArray(), model.externalBuffers().toArray())
                 );
             } finally {
                 model.close();
                 assertAll("model",
                         () -> assertNull(model.nativeHandle()),
-                        () -> assertNotNull(model.attachedBuffers()),
-                        () -> assertTrue(model.attachedBuffers().isEmpty(), "attachedBuffers should be empty")
+                        () -> assertNotNull(model.externalBuffers()),
+                        () -> assertTrue(model.externalBuffers().isEmpty(), "externalBuffers should be empty")
                 );
                 assertAll("model builder",
-                        () -> assertNotNull(modelBuilder.attachedBuffers()),
-                        () -> assertTrue(!modelBuilder.attachedBuffers().isEmpty(),
-                                "attachedBuffers should not be empty")
+                        () -> assertNotNull(modelBuilder.externalBuffers()),
+                        () -> assertTrue(!modelBuilder.externalBuffers().isEmpty(),
+                                "externalBuffers should not be empty")
                 );
 
                 // close() is an idempotent operation
@@ -163,15 +163,15 @@ public class ModelTest {
         final String backendConfig = "";
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData)
         ) {
             try (ModelBuilder modelBuilder = Model.builder(vpt)) {
-                modelBuilder.attach("input", input);
-                assertTrue(!modelBuilder.attachedBuffers().isEmpty(), "attachedBuffers should not be empty");
+                modelBuilder.attachExternalBuffer("input", input);
+                assertTrue(!modelBuilder.externalBuffers().isEmpty(), "externalBuffers should not be empty");
 
                 final Model model = modelBuilder.build(modelData, backendName, backendConfig);
                 try {
@@ -179,15 +179,15 @@ public class ModelTest {
                     modelBuilder.close();
 
                     assertAll("model builder",
-                            () -> assertNotNull(modelBuilder.attachedBuffers()),
-                            () -> assertTrue(modelBuilder.attachedBuffers().isEmpty(),
-                                    "attachedBuffers should be empty")
+                            () -> assertNotNull(modelBuilder.externalBuffers()),
+                            () -> assertTrue(modelBuilder.externalBuffers().isEmpty(),
+                                    "externalBuffers should be empty")
                     );
                     assertAll("model",
                             () -> assertNotNull(model.nativeHandle()),
-                            () -> assertNotNull(model.attachedBuffers()),
-                            () -> assertTrue(!model.attachedBuffers().isEmpty(),
-                                    "attachedBuffers should not be empty")
+                            () -> assertNotNull(model.externalBuffers()),
+                            () -> assertTrue(!model.externalBuffers().isEmpty(),
+                                    "externalBuffers should not be empty")
                     );
                 } finally {
                     model.close();
@@ -205,14 +205,14 @@ public class ModelTest {
         final String backendConfig = "";
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
-            modelBuilder.attach("input", new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f});
+            modelBuilder.attachExternalBuffer("input", new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f});
 
             MenohException e = assertThrows(
                     MenohException.class, () -> modelBuilder.build(modelData, backendName, backendConfig));
@@ -238,7 +238,7 @@ public class ModelTest {
         final float[] expectedOutput2 = new float[] {1f, 0f, 0f, 0f};
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
@@ -299,12 +299,13 @@ public class ModelTest {
         final float[] expectedOutput2 = new float[] {1f, 0f, 0f, 0f};
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
-                ModelBuilder modelBuilder = Model.builder(vpt).attach("input", inputDataBuf);
+                ModelBuilder modelBuilder =
+                        Model.builder(vpt).attachExternalBuffer("input", inputDataBuf);
                 Model model = modelBuilder.build(modelData, "mkldnn", "")
         ) {
             // you can delete modelData explicitly after building a model
@@ -361,12 +362,13 @@ public class ModelTest {
         final float[] expectedOutput = new float[] {0f, 0f, 0f, 1f};
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
-                ModelBuilder modelBuilder = Model.builder(vpt).attach("input", inputDataBuf);
+                ModelBuilder modelBuilder =
+                        Model.builder(vpt).attachExternalBuffer("input", inputDataBuf);
                 Model model = modelBuilder.build(modelData, "mkldnn", "")
         ) {
             // you can delete modelData explicitly after building a model
@@ -410,12 +412,13 @@ public class ModelTest {
         final float[] expectedOutput = new float[] {0f, 0f, 0f, 1f};
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
-                ModelBuilder modelBuilder = Model.builder(vpt).attach("input", readOnlyInputDataBuf);
+                ModelBuilder modelBuilder =
+                        Model.builder(vpt).attachExternalBuffer("input", readOnlyInputDataBuf);
                 Model model = modelBuilder.build(modelData, "mkldnn", "")
         ) {
             // you can delete modelData explicitly after building a model
@@ -455,12 +458,13 @@ public class ModelTest {
         final float[] expectedOutput = new float[] {0f, 0f, 0f, 1f};
 
         try (
-                ModelData modelData = ModelData.makeFromOnnx(path);
+                ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputProfile("output", DType.FLOAT);
                 VariableProfileTable vpt = vptBuilder.build(modelData);
-                ModelBuilder modelBuilder = Model.builder(vpt).attach("input", inputData);
+                ModelBuilder modelBuilder =
+                        Model.builder(vpt).attachExternalBuffer("input", inputData);
                 Model model = modelBuilder.build(modelData, "mkldnn", "")
         ) {
             // you can delete modelData explicitly after building a model
