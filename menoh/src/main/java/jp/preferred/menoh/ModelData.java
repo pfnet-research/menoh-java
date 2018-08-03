@@ -6,7 +6,10 @@ import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 
 /**
- * A model data.
+ * <p>A model data.</p>
+ *
+ * <p>Make sure to {@link #close()} this object after finishing the process to free the underlying memory
+ * in the native heap.</p>
  */
 public class ModelData implements AutoCloseable {
     private Pointer handle;

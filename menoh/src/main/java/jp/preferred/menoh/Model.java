@@ -9,7 +9,10 @@ import com.sun.jna.ptr.PointerByReference;
 import java.util.List;
 
 /**
- * A representation of the model. It will be built by {@link ModelBuilder}.
+ * <p>A representation of the model. It will be built by {@link ModelBuilder}.</p>
+ *
+ * <p>Make sure to {@link #close()} this object after finishing the process to free the underlying memory
+ * in the native heap.</p>
  */
 public class Model implements AutoCloseable {
     private Pointer handle;

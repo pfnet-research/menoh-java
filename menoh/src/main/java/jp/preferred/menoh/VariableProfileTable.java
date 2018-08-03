@@ -7,8 +7,11 @@ import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
 /**
- * A table which holds {@link VariableProfile}s for the {@link Model}. It will be built by
- * {@link VariableProfileTableBuilder}.
+ * <p>A table which holds {@link VariableProfile}s for the {@link Model}. It will be built by
+ * {@link VariableProfileTableBuilder}.</p>
+ *
+ * <p>Make sure to {@link #close()} this object after finishing the process to free the underlying memory
+ * in the native heap.</p>
  */
 public class VariableProfileTable implements AutoCloseable {
     private Pointer handle;

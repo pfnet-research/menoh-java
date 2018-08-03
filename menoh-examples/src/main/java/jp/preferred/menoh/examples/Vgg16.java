@@ -9,7 +9,6 @@ import java.awt.image.Raster;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ public class Vgg16 {
 
         System.err.println("Working Directory = " + System.getProperty("user.dir"));
         if (Boolean.getBoolean("jna.debug_load")) {
-            NativeLibrary.getProcess(); // trick to initialize `NativeLibrary` explicitly in this place
+            NativeLibrary.getProcess(); // a trick to initialize `NativeLibrary` explicitly in this place
             System.err.println("jna.library.path: " + System.getProperty("jna.library.path"));
             System.err.println("jna.platform.library.path: " + System.getProperty("jna.platform.library.path"));
         }
@@ -60,7 +59,7 @@ public class Vgg16 {
 
                         // Define input profile (name, dtype, dims) and output profile (name, dtype)
                         // dims of output is automatically calculated later
-                        .addInputProfile(conv11InName, DType.FLOAT, new int[]{batchSize, channelNum, height, width})
+                        .addInputProfile(conv11InName, DType.FLOAT, new int[] {batchSize, channelNum, height, width})
                         .addOutputProfile(fc6OutName, DType.FLOAT)
                         .addOutputProfile(softmaxOutName, DType.FLOAT)
 
@@ -76,20 +75,20 @@ public class Vgg16 {
             runner.run(conv11InName, imageData);
 
             // Get output variables
-            final Variable fc60Out = runner.variable(fc6OutName);
+            final Variable fc6Out = runner.variable(fc6OutName);
             final Variable softmaxOut = runner.variable(softmaxOutName);
 
             // Get output
-            final FloatBuffer fc6OutputFloatBuff = fc60Out.buffer().asFloatBuffer();
+            final FloatBuffer fc6OutFloatBuff = fc6Out.buffer().asFloatBuffer();
             for (int i = 0; i < 10; i++) {
-                System.out.print(Float.toString(fc6OutputFloatBuff.get(i)) + " ");
+                System.out.print(Float.toString(fc6OutFloatBuff.get(i)) + " ");
             }
             System.out.println();
 
-            final int[] softmaxDims = softmaxOut.dims();
+            final int[] softmaxOutDims = softmaxOut.dims();
 
             // Note: use `get()` instead of `array()` because it is a direct buffer
-            final float[] scores = new float[softmaxDims[1]];
+            final float[] scores = new float[softmaxOutDims[1]];
             softmaxOut.buffer().asFloatBuffer().get(scores);
 
             final int topK = 5;
@@ -97,7 +96,7 @@ public class Vgg16 {
 
             System.out.println("top " + topK + "  categories are");
 
-            final List<Score> topKIndices = extractTopKIndices(scores, 0, softmaxDims[1], topK);
+            final List<Score> topKIndices = extractTopKIndices(scores, 0, softmaxOutDims[1], topK);
             for (Score s : topKIndices) {
                 int ki = s.index;
                 System.out.println("index: " + ki + ", score: " + scores[ki] + ", category: " + categories.get(ki));

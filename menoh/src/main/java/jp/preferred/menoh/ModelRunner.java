@@ -7,7 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A convenient wrapper for building and running {@link Model}.
+ * <p>A convenient wrapper for building and running {@link Model}.</p>
+ *
+ * <p>Make sure to {@link #close()} this object after finishing the process to free the underlying memory
+ * in the native heap.</p>
  */
 public class ModelRunner implements AutoCloseable {
     private final Model model;

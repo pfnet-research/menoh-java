@@ -5,7 +5,10 @@ import java.nio.ByteOrder;
 import java.util.Map;
 
 /**
- * A builder object for {@link ModelRunner}.
+ * <p>A builder object for {@link ModelRunner}.</p>
+ *
+ * <p>Make sure to {@link #close()} this object after finishing the process to free the underlying memory
+ * in the native heap.</p>
  */
 public class ModelRunnerBuilder implements AutoCloseable {
     private final ModelData modelData;

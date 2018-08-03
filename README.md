@@ -4,7 +4,7 @@ Java binding for [Menoh](https://github.com/pfnet-research/menoh/) DNN inference
 (This library only works on 64-bit architecture at the moment.)
 
 ## Requirements
-This package depends on the native [Menoh](https://github.com/pfnet-research/menoh/) library. You need to [install](https://github.com/pfnet-research/menoh/blob/master/README.md#installation-using-package-manager-or-binary-packages) it before running.
+This package depends on the [Menoh](https://github.com/pfnet-research/menoh/) native shared library. You need to [install](https://github.com/pfnet-research/menoh/blob/master/README.md#installation-using-package-manager-or-binary-packages) it to the JVM classpath or the system library path before running.
 
 ### Linux
 TODO
@@ -31,7 +31,7 @@ menoh-java provides two types of API: `Model` and `ModelRunner`. `ModelRunner` i
 ### `ModelRunner`
 `ModelRunner` is a high-level API of menoh-java. What you only need to do is to configure `ModelRunnerBuilder` by using your ONNX model, and `build()` a runner object.
 
-Note that you must `close()` both the runner and its builder explicitly because it manages objects in the native heap which will not be garbage collected by JVM.
+Note that you must `close()` both the runner and its builder objects explicitly because it frees the memory for objects in the native heap which will not be garbage collected by the JVM.
 
 ```java
 try (
@@ -41,7 +41,7 @@ try (
 
         // Define input profile (name, dtype, dims) and output profile (name, dtype)
         // dims of output is automatically calculated later
-        .addInputProfile(conv11InName, DType.FLOAT, new int[]{batchSize, channelNum, height, width})
+        .addInputProfile(conv11InName, DType.FLOAT, new int[] {batchSize, channelNum, height, width})
         .addOutputProfile(fc6OutName, DType.FLOAT)
         .addOutputProfile(softmaxOutName, DType.FLOAT)
 
@@ -52,7 +52,6 @@ try (
 ) {
     // builder can be deleted explicitly after building a model runner
     builder.close();
-
     ...
 ```
 
@@ -63,12 +62,14 @@ Once you create the `ModelRunner`, you can `run()` the model with input data aga
     runner.run(conv11InName, imageData);
 
     final Variable softmaxOut = runner.variable(softmaxOutName);
-    final ByteBuffer softmaxOutputBuff = softmaxOut.buffer();
-    final int[] softmaxDims = softmaxOut.dims();
+
+    final int[] softmaxOutDims = softmaxOut.dims();
+    final ByteBuffer softmaxOutBuff = softmaxOut.buffer();
 
     // Note: use `get()` instead of `array()` because it is a direct buffer
-    final float[] scores = new float[softmaxDims[1]];
-    softmaxOutputBuff.asFloatBuffer().get(scores);
+    final float[] scores = new float[softmaxOutDims[1]];
+    softmaxOutBuff.asFloatBuffer().get(scores);
+    ...
 ```
 
 ### `Model`
@@ -76,15 +77,17 @@ The low-level API consists of `ModelData`, `VariableProfileTable` and `ModelBuil
 
 ## Build
 ```bash
+$ git clone https://github.com/pfnet-research/menoh-java.git
+$ cd menoh-java
 $ mvn package
 ```
 
-Note that `mvn test` requires that the native Menoh library is available in your system.
+Note that `mvn test` requires that the Menoh native is available in the local system.
 
 ## FAQ
 
 ### menoh-java fails with `java.lang.UnsatisfiedLinkError`
-menoh-java depends on the native Menoh library. You'll get `java.lang.UnsatisfiedLinkError` if it isn't located in [JNA search path](http://java-native-access.github.io/jna/4.5.2/javadoc/com/sun/jna/NativeLibrary.html) at startup even if it exists in the local system.
+menoh-java depends on the Menoh native shared library. You'll get `java.lang.UnsatisfiedLinkError` at startup if it isn't located in [JNA search path](http://java-native-access.github.io/jna/4.5.2/javadoc/com/sun/jna/NativeLibrary.html) even if it exists in the local system.
 
 ```
 java.lang.UnsatisfiedLinkError: Unable to load library 'menoh': Native library (win32-x86-64/menoh.dll) not found in resource path ([file:/C:/workspace/menoh-java/menoh-examples/target/classes/, file:/C:/Users/user/.m2/repository/jp/preferred/menoh/menoh/1.0.0-SNAPSHOT/menoh-1.0.0-SNAPSHOT.jar, file:/C:/Users/user/.m2/repository/net/java/dev/jna/jna/4.5.2/jna-4.5.2.jar])
@@ -93,11 +96,11 @@ java.lang.UnsatisfiedLinkError: Unable to load library 'menoh': Native library (
 	at com.sun.jna.Library$Handler.<init>(Library.java:179)
 	at com.sun.jna.Native.loadLibrary(Native.java:569)
 	at com.sun.jna.Native.loadLibrary(Native.java:544)
-    at jp.preferred.menoh.MenohNative.<clinit> (MenohNative.java:11)
-    ...
+	at jp.preferred.menoh.MenohNative.<clinit> (MenohNative.java:11)
+	...
 ```
 
-If you fall into this situation, you need to configure the system property (`jna.library.path`) or place the native Menoh in the classpath or the path depend on your platform (`PATH` on Windows, `LD_LIBRARY_PATH` on Linux and `DYLD_LIBRARY_PATH` on OSX). See the [JNA's document](https://github.com/java-native-access/jna/blob/master/www/GettingStarted.md) for more details.
+If you fall into this situation, you need to configure the system property (`jna.library.path`) or install the library file to the JVM classpath or the system library path depend on your platform (`PATH` on Windows, `LD_LIBRARY_PATH` on Linux and `DYLD_LIBRARY_PATH` on OSX). See the [JNA's document](https://github.com/java-native-access/jna/blob/master/www/GettingStarted.md) for more details.
 
 To inspect the problem, you may set the system property `jna.debug_load=true` to know what is getting wrong:
 

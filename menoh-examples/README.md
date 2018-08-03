@@ -1,7 +1,10 @@
 # menoh-examples
 
+## Requirements
+See the ["Requirements"](https://github.com/pfnet-research/menoh-java/blob/master/README.md#requirements) section in README for menoh-java.
+
 ## Setup
-You need to run the following to install `menoh` package before executing examples.
+You need to run the following to install `menoh` package to the local repository before executing examples.
 
 ```bash
 $ git clone https://github.com/pfnet-research/menoh-java.git

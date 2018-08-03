@@ -12,7 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A builder object for {@link Model}.
+ * <p>A builder object for {@link Model}.</p>
+ *
+ * <p>Make sure to {@link #close()} this object after finishing the process to free the underlying memory
+ * in the native heap.</p>
  */
 public class ModelBuilder implements AutoCloseable {
     private Pointer handle;
