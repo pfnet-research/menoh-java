@@ -17,6 +17,10 @@ import java.util.Comparator;
 import java.util.List;
 import javax.imageio.ImageIO;
 
+/**
+ * <p>Classify an input image by using VGG16, a CNN-based pre-trained model.</p> See the
+ * <a href="https://pfnet-research.github.io/menoh/md_tutorial.html">Menoh tutorial</a> for the details.</p>
+ */
 public class Vgg16 {
     public static void main(String[] args) throws Exception {
         if (args.length <= 0) {
@@ -51,14 +55,15 @@ public class Vgg16 {
         }
         final float[] imageData = renderToNctw(cropAndResize(image, width, height));
 
-        // Note: You must `close()` the runner and builder to free the native memory explicitly
+        // Build a ModelRunner
         try (
+                // Note: You must `close()` the runner and builder to free the native memory explicitly
                 ModelRunnerBuilder builder = ModelRunner
                         // Load ONNX model data
                         .fromOnnxFile(onnxModelPath)
 
                         // Define input profile (name, dtype, dims) and output profile (name, dtype)
-                        // dims of output is automatically calculated later
+                        // Menoh calculates dims of outputs automatically at build time
                         .addInputProfile(conv11InName, DType.FLOAT, new int[] {batchSize, channelNum, height, width})
                         .addOutputProfile(fc6OutName, DType.FLOAT)
                         .addOutputProfile(softmaxOutName, DType.FLOAT)
@@ -68,27 +73,28 @@ public class Vgg16 {
                         .backendConfig("");
                  ModelRunner runner = builder.build()
         ) {
-            // builder can be deleted explicitly after building a model runner
+            // The builder can be deleted explicitly after building a model runner
             builder.close();
 
             // Run the inference
             runner.run(conv11InName, imageData);
 
-            // Get output variables
+            // Get output of `fc6` (the first hidden FC layer after CNNs in VGG16)
             final Variable fc6Out = runner.variable(fc6OutName);
-            final Variable softmaxOut = runner.variable(softmaxOutName);
 
-            // Get output
-            final FloatBuffer fc6OutFloatBuff = fc6Out.buffer().asFloatBuffer();
+            final FloatBuffer fc6OutFloatBuf = fc6Out.buffer().asFloatBuffer();
             for (int i = 0; i < 10; i++) {
-                System.out.print(Float.toString(fc6OutFloatBuff.get(i)) + " ");
+                System.out.print(Float.toString(fc6OutFloatBuf.get(i)) + " ");
             }
             System.out.println();
 
+            // Get output of `softmax` (the output layer in VGG16)
+            final Variable softmaxOut = runner.variable(softmaxOutName);
+
             final int[] softmaxOutDims = softmaxOut.dims();
+            final float[] scores = new float[softmaxOutDims[1]];
 
             // Note: use `get()` instead of `array()` because it is a direct buffer
-            final float[] scores = new float[softmaxOutDims[1]];
             softmaxOut.buffer().asFloatBuffer().get(scores);
 
             final int topK = 5;
@@ -123,6 +129,9 @@ public class Vgg16 {
         return destImage;
     }
 
+    /**
+     * Crop and resize an input image to fit the size required by the VGG16 model.
+     */
     private static BufferedImage cropAndResize(BufferedImage image, int width, int height) {
         final int shortEdge = Math.min(image.getWidth(), image.getHeight());
         final int x0 = (image.getWidth() - shortEdge) / 2;
@@ -136,7 +145,9 @@ public class Vgg16 {
         return resized;
     }
 
-
+    /**
+     * Convert a HWC (Height x Width x Channels) format image into a NCHW (N x Channels x Height x Width) format.
+     */
     private static float[] renderToNctw(BufferedImage image) {
         final int height = image.getHeight();
         final int width = image.getWidth();

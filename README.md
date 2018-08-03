@@ -1,10 +1,10 @@
-# Menoh-Java
-Java binding for [Menoh](https://github.com/pfnet-research/menoh/) DNN inference library.
+# menoh-java
+*menoh-java* enables you to build your own Deep Neural Network (DNN) application with a few lines of code in Java.
 
-(This library only works on 64-bit architecture at the moment.)
+This is a Java binding for [Menoh](https://github.com/pfnet-research/menoh/) DNN inference library, which supports [ONNX](http://onnx.ai/) model format.
 
-## Requirements
-This package depends on the [Menoh](https://github.com/pfnet-research/menoh/) native shared library. You need to [install](https://github.com/pfnet-research/menoh/blob/master/README.md#installation-using-package-manager-or-binary-packages) it to the JVM classpath or the system library path before running.
+## Installation
+This package depends on the [Menoh](https://github.com/pfnet-research/menoh/) native shared library to maximize the utilization of hardware resources. You need to [install](https://github.com/pfnet-research/menoh/blob/master/README.md#installation-using-package-manager-or-binary-packages) it to the JVM classpath or the system library path before running.
 
 ### Linux
 TODO
@@ -23,24 +23,27 @@ Download the following binaries from the [release page](https://github.com/pfnet
 - menoh_prebuild_win_v?.?.?.zip
 
 ## Examples
-Please see [menoh-examples](https://github.com/pfnet-research/menoh-java/tree/master/menoh-examples) directory in this repository.
+Please see [menoh-examples](menoh-examples) directory in this repository.
 
 ## Usage
-menoh-java provides two types of API: `Model` and `ModelRunner`. `ModelRunner` is a simple wrapper of `Model` and its low-level builder objects. You should choose `ModelRunner` in most cases because it manages their lifecycle on behalf of you.
+menoh-java provides two types of APIs: high-level and low-level. The high-level API is a simple wrapper of the low-level API. You should choose the high-level API in most cases because it manages lifecycle of the low-level objects on behalf of you.
 
-### `ModelRunner`
+### High-level API
 `ModelRunner` is a high-level API of menoh-java. What you only need to do is to configure `ModelRunnerBuilder` by using your ONNX model, and `build()` a runner object.
 
 Note that you must `close()` both the runner and its builder objects explicitly because it frees the memory for objects in the native heap which will not be garbage collected by the JVM.
 
 ```java
+import jp.preferred.menoh.ModelRunner;
+import jp.preferred.menoh.ModelRunnerBuilder;
+
 try (
     ModelRunnerBuilder builder = ModelRunner
         // Load ONNX model data
         .fromOnnxFile(onnxModelPath)
 
         // Define input profile (name, dtype, dims) and output profile (name, dtype)
-        // dims of output is automatically calculated later
+        // Menoh calculates dims of outputs automatically at build time
         .addInputProfile(conv11InName, DType.FLOAT, new int[] {batchSize, channelNum, height, width})
         .addOutputProfile(fc6OutName, DType.FLOAT)
         .addOutputProfile(softmaxOutName, DType.FLOAT)
@@ -50,7 +53,7 @@ try (
         .backendConfig("");
     ModelRunner runner = builder.build()
 ) {
-    // builder can be deleted explicitly after building a model runner
+    // The builder can be deleted explicitly after building a model runner
     builder.close();
     ...
 ```
@@ -64,16 +67,16 @@ Once you create the `ModelRunner`, you can `run()` the model with input data aga
     final Variable softmaxOut = runner.variable(softmaxOutName);
 
     final int[] softmaxOutDims = softmaxOut.dims();
-    final ByteBuffer softmaxOutBuff = softmaxOut.buffer();
+    final ByteBuffer softmaxOutBuf = softmaxOut.buffer();
 
     // Note: use `get()` instead of `array()` because it is a direct buffer
     final float[] scores = new float[softmaxOutDims[1]];
-    softmaxOutBuff.asFloatBuffer().get(scores);
+    softmaxOutBuf.asFloatBuffer().get(scores);
     ...
 ```
 
-### `Model`
-The low-level API consists of `ModelData`, `VariableProfileTable` and `ModelBuilder` to build a `Model`. You don't need to use them in most cases other than managing lifecycle of the builder objects and the variable buffers by hand.
+### Low-level API
+The low-level API consists of `ModelData`, `VariableProfileTable` and `Model`. You don't need to use them in most cases other than managing lifecycle of the builder objects and the variable buffers by hand.
 
 ## Build
 ```bash
@@ -100,7 +103,7 @@ java.lang.UnsatisfiedLinkError: Unable to load library 'menoh': Native library (
 	...
 ```
 
-If you fall into this situation, you need to configure the system property (`jna.library.path`) or install the library file to the JVM classpath or the system library path depend on your platform (`PATH` on Windows, `LD_LIBRARY_PATH` on Linux and `DYLD_LIBRARY_PATH` on OSX). See the [JNA's document](https://github.com/java-native-access/jna/blob/master/www/GettingStarted.md) for more details.
+If you fall into this situation, you need to configure the system property (`jna.library.path`) or install the library file to the JVM classpath or the system library path, which depends on your platform (`PATH` on Windows, `LD_LIBRARY_PATH` on Linux and `DYLD_LIBRARY_PATH` on OSX). See the [JNA's document](https://github.com/java-native-access/jna/blob/master/www/GettingStarted.md) for more details.
 
 To inspect the problem, you may set the system property `jna.debug_load=true` to know what is getting wrong:
 
@@ -126,7 +129,8 @@ System.err.println("jna.library.path: " + System.getProperty("jna.library.path")
 System.err.println("jna.platform.library.path: " + System.getProperty("jna.platform.library.path"));
 ```
 
-## License
-The library license is as follows:
+## Limitation
+This library only works on 64-bit architecture at the moment.
 
-- [LICENSE](LICENSE)
+## License
+menoh-java is released under MIT License. Please see the [LICENSE](LICENSE) file for details.

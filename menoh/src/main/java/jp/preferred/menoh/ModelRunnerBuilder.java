@@ -74,7 +74,7 @@ public class ModelRunnerBuilder implements AutoCloseable {
     }
 
     /**
-     * Adds an input profile to configure the specified variable of the model.
+     * Adds an input profile to configure the specified variable in the model.
      *
      * @return this object
      */
@@ -84,7 +84,7 @@ public class ModelRunnerBuilder implements AutoCloseable {
     }
 
     /**
-     * Adds an output profile to configure the specified variable of the model.
+     * Adds an output profile to configure the specified variable in the model.
      *
      * @return this object
      */

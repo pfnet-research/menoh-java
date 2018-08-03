@@ -134,7 +134,7 @@ public class ModelRunner implements AutoCloseable {
     }
 
     /**
-     * Assign data to the variables of the model.
+     * Assign data to the variables in the model.
      */
     private void assignToVariables(final Map<String, ByteBuffer> data) {
         for (Map.Entry<String, ByteBuffer> e : data.entrySet()) {

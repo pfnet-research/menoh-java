@@ -5,7 +5,7 @@ import com.sun.jna.Pointer;
 import java.nio.ByteBuffer;
 
 /**
- * An input or output variable of the model.
+ * An input or output variable in the model.
  */
 public class Variable {
     private final DType dtype;
