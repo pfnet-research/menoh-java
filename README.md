@@ -6,8 +6,73 @@ Java binding for [Menoh](https://github.com/pfnet-research/menoh/) DNN inference
 ## Requirements
 This package depends on the native [Menoh](https://github.com/pfnet-research/menoh/) library. You need to [install](https://github.com/pfnet-research/menoh/blob/master/README.md#installation-using-package-manager-or-binary-packages) it before running.
 
+### Linux
+TODO
+
+### Mac OS
+Use [pfnet-research/homebrew-menoh](https://github.com/pfnet-research/homebrew-menoh).
+
+```
+brew tap pfnet-research/menoh
+brew install menoh
+```
+
+### Windows
+Download the following binaries from the [release page](https://github.com/pfnet-research/menoh/releases) in Menoh repository and place it to the classpath.
+
+- menoh_prebuild_win_v?.?.?.zip
+
 ## Examples
 Please see [menoh-examples](https://github.com/pfnet-research/menoh-java/tree/master/menoh-examples) directory in this repository.
+
+## Usage
+menoh-java provides two types of API: `Model` and `ModelRunner`. `ModelRunner` is a simple wrapper of `Model` and its low-level builder objects. You should choose `ModelRunner` in most cases because it manages their lifecycle on behalf of you.
+
+### `ModelRunner`
+`ModelRunner` is a high-level API of menoh-java. What you only need to do is to configure `ModelRunnerBuilder` by using your ONNX model, and `build()` a runner object.
+
+Note that you must `close()` both the runner and its builder explicitly because it manages objects in the native heap which will not be garbage collected by JVM.
+
+```java
+try (
+    ModelRunnerBuilder builder = ModelRunner
+        // Load ONNX model data
+        .fromOnnxFile(onnxModelPath)
+
+        // Define input profile (name, dtype, dims) and output profile (name, dtype)
+        // dims of output is automatically calculated later
+        .addInputProfile(conv11InName, DType.FLOAT, new int[]{batchSize, channelNum, height, width})
+        .addOutputProfile(fc6OutName, DType.FLOAT)
+        .addOutputProfile(softmaxOutName, DType.FLOAT)
+
+        // Configure backend
+        .backendName("mkldnn")
+        .backendConfig("");
+    ModelRunner runner = builder.build()
+) {
+    // builder can be deleted explicitly after building a model runner
+    builder.close();
+
+    ...
+```
+
+Once you create the `ModelRunner`, you can `run()` the model with input data again and again:
+
+```java
+    // Run the inference
+    runner.run(conv11InName, imageData);
+
+    final Variable softmaxOut = runner.variable(softmaxOutName);
+    final ByteBuffer softmaxOutputBuff = softmaxOut.buffer();
+    final int[] softmaxDims = softmaxOut.dims();
+
+    // Note: use `get()` instead of `array()` because it is a direct buffer
+    final float[] scores = new float[softmaxDims[1]];
+    softmaxOutputBuff.asFloatBuffer().get(scores);
+```
+
+### `Model`
+The low-level API consists of `ModelData`, `VariableProfileTable` and `ModelBuilder` to build a `Model`. You don't need to use them in most cases other than managing lifecycle of the builder objects and the variable buffers by hand.
 
 ## Build
 ```bash
@@ -19,31 +84,22 @@ Note that `mvn test` requires that the native Menoh library is available in your
 ## FAQ
 
 ### menoh-java fails with `java.lang.UnsatisfiedLinkError`
-menoh-java depends on [Java Native Access (JNA)](https://github.com/java-native-access/jna) to access to the native Menoh library. JNA scans the local system to load the library at startup.
-
-You'll get `java.lang.UnsatisfiedLinkError` if the native Menoh for your platform is not located in [JNA search path](http://java-native-access.github.io/jna/4.5.2/javadoc/com/sun/jna/NativeLibrary.html) even if it exists in your system.
+menoh-java depends on the native Menoh library. You'll get `java.lang.UnsatisfiedLinkError` if it isn't located in [JNA search path](http://java-native-access.github.io/jna/4.5.2/javadoc/com/sun/jna/NativeLibrary.html) at startup even if it exists in the local system.
 
 ```
-java.lang.UnsatisfiedLinkError: Unable to load library 'menoh': Native library (win32-x86-64/menoh.dll) not found in resource path ([file:/C:/workspace/menoh-java/menoh-examples/target/classes/, ...])
-    at com.sun.jna.NativeLibrary.loadLibrary (NativeLibrary.java:303)
-    at com.sun.jna.NativeLibrary.getInstance (NativeLibrary.java:427)
-    at com.sun.jna.Library$Handler.<init> (Library.java:179)
-    at com.sun.jna.Native.loadLibrary (Native.java:569)
-    at com.sun.jna.Native.loadLibrary (Native.java:544)
+java.lang.UnsatisfiedLinkError: Unable to load library 'menoh': Native library (win32-x86-64/menoh.dll) not found in resource path ([file:/C:/workspace/menoh-java/menoh-examples/target/classes/, file:/C:/Users/user/.m2/repository/jp/preferred/menoh/menoh/1.0.0-SNAPSHOT/menoh-1.0.0-SNAPSHOT.jar, file:/C:/Users/user/.m2/repository/net/java/dev/jna/jna/4.5.2/jna-4.5.2.jar])
+	at com.sun.jna.NativeLibrary.loadLibrary(NativeLibrary.java:303)
+	at com.sun.jna.NativeLibrary.getInstance(NativeLibrary.java:427)
+	at com.sun.jna.Library$Handler.<init>(Library.java:179)
+	at com.sun.jna.Native.loadLibrary(Native.java:569)
+	at com.sun.jna.Native.loadLibrary(Native.java:544)
     at jp.preferred.menoh.MenohNative.<clinit> (MenohNative.java:11)
-    at jp.preferred.menoh.ModelData.makeFromOnnx (ModelData.java:48)
-    at jp.preferred.menoh.examples.Vgg16.main (Vgg16.java:54)
-    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0 (Native Method)
-    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:62)
-    at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)
-    at java.lang.reflect.Method.invoke (Method.java:564)
-    at org.codehaus.mojo.exec.ExecJavaMojo$1.run (ExecJavaMojo.java:282)
-at java.lang.Thread.run (Thread.java:844)
+    ...
 ```
 
-If you fall into this situation, you need to configure the system property (`jna.library.path`) or locate the library in the appropriate place (`PATH` on Windows, `LD_LIBRARY_PATH` on Linux and `DYLD_LIBRARY_PATH` on OSX). See the [JNA's document](https://github.com/java-native-access/jna/blob/master/www/GettingStarted.md) for more details.
+If you fall into this situation, you need to configure the system property (`jna.library.path`) or place the native Menoh in the classpath or the path depend on your platform (`PATH` on Windows, `LD_LIBRARY_PATH` on Linux and `DYLD_LIBRARY_PATH` on OSX). See the [JNA's document](https://github.com/java-native-access/jna/blob/master/www/GettingStarted.md) for more details.
 
-You may set the system property `jna.debug_load=true` to know what is getting wrong:
+To inspect the problem, you may set the system property `jna.debug_load=true` to know what is getting wrong:
 
 ```
 $ mvn exec:java ... -Djna.debug_load=true
@@ -59,10 +115,10 @@ Trying libmenoh.dll
 Looking in classpath from java.net.URLClassLoader@3e997fa1 for menoh
 ```
 
-And you can also check `jna.platform.library.path`:
+And you can also see `jna.platform.library.path`:
 
 ```java
-NativeLibrary.getProcess(); // trick to initialize `NativeLibrary` explicitly in this place
+NativeLibrary.getProcess(); // a trick to initialize `NativeLibrary` explicitly in this place
 System.err.println("jna.library.path: " + System.getProperty("jna.library.path"));
 System.err.println("jna.platform.library.path: " + System.getProperty("jna.platform.library.path"));
 ```

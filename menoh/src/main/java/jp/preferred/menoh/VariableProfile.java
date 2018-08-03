@@ -20,7 +20,7 @@ public class VariableProfile {
     }
 
     /**
-     * An array of dimension size.
+     * An array of dimensions.
      */
     public int[] dims() {
         if (dims != null) {

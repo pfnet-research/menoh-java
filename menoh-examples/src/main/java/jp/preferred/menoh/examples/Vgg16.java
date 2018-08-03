@@ -54,7 +54,7 @@ public class Vgg16 {
 
         // Note: You must `close()` the runner and builder to free the native memory explicitly
         try (
-                ModelRunnerBuilder modelRunnerBuilder = ModelRunner
+                ModelRunnerBuilder builder = ModelRunner
                         // Load ONNX model data
                         .fromOnnxFile(onnxModelPath)
 
@@ -67,32 +67,30 @@ public class Vgg16 {
                         // Configure backend
                         .backendName("mkldnn")
                         .backendConfig("");
-                 ModelRunner modelRunner = modelRunnerBuilder.build()
+                 ModelRunner runner = builder.build()
         ) {
-            // modelRunnerBuilder can be deleted explicitly after building a model
-            modelRunnerBuilder.close();
+            // builder can be deleted explicitly after building a model runner
+            builder.close();
 
             // Run the inference
-            modelRunner.run(conv11InName, imageData);
+            runner.run(conv11InName, imageData);
 
-            final Model model = modelRunner.model();
-
-            // Get output buffers
-            final ByteBuffer fc6OutputBuff = model.variable(fc6OutName).buffer();
-            final ByteBuffer softmaxOutputBuff = model.variable(softmaxOutName).buffer();
+            // Get output variables
+            final Variable fc60Out = runner.variable(fc6OutName);
+            final Variable softmaxOut = runner.variable(softmaxOutName);
 
             // Get output
-            final FloatBuffer fc6OutputFloatBuff = fc6OutputBuff.asFloatBuffer();
+            final FloatBuffer fc6OutputFloatBuff = fc60Out.buffer().asFloatBuffer();
             for (int i = 0; i < 10; i++) {
                 System.out.print(Float.toString(fc6OutputFloatBuff.get(i)) + " ");
             }
             System.out.println();
 
-            final int[] softmaxDims = model.variable(softmaxOutName).dims();
+            final int[] softmaxDims = softmaxOut.dims();
 
             // Note: use `get()` instead of `array()` because it is a direct buffer
             final float[] scores = new float[softmaxDims[1]];
-            softmaxOutputBuff.asFloatBuffer().get(scores);
+            softmaxOut.buffer().asFloatBuffer().get(scores);
 
             final int topK = 5;
             final List<String> categories = loadCategories(synsetWordsPath);

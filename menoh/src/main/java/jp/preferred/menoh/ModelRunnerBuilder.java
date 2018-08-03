@@ -172,7 +172,7 @@ public class ModelRunnerBuilder implements AutoCloseable {
                 modelBuilder.attachExternalBuffer(e.getKey(), e.getValue());
             }
 
-            // reduce the memory footprint of
+            // reduce the memory footprint of the model data
             modelData.optimize(vpt);
 
             final Model model = modelBuilder.build(modelData, backendName, backendConfig);

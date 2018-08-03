@@ -23,7 +23,7 @@ public class ModelRunner implements AutoCloseable {
     /**
      * Returns the underlying {@link Model}.
      */
-    public Model model() {
+    Model model() {
         return this.model;
     }
 
@@ -58,6 +58,13 @@ public class ModelRunner implements AutoCloseable {
 
             throw t;
         }
+    }
+
+    /**
+     * Returns a {@link Variable} with the specified name.
+     */
+    public Variable variable(String variableName) throws MenohException {
+        return model.variable(variableName);
     }
 
     /**
