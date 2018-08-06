@@ -15,6 +15,7 @@
     <packaging>jar</packaging>
 
     <name>Menoh Java</name>
+    <description>A Java binding for Menoh DNN inference library</description>
     <url>https://github.com/pfnet-research/menoh-java</url>
 
     <properties>
@@ -113,23 +114,6 @@
                         </goals>
                    </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-              <groupId>org.sonatype.plugins</groupId>
-              <artifactId>nexus-staging-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

@@ -10,11 +10,31 @@
     <packaging>pom</packaging>
 
     <name>Menoh Java Parent</name>
+    <description>A Java binding for Menoh DNN inference library</description>
     <url>https://github.com/pfnet-research/menoh-java</url>
 
     <modules>
         <module>menoh</module>
     </modules>
+
+    <developers>
+        <developer>
+            <id>durswd</id>
+            <name>swd</name>
+        </developer>
+        <developer>
+            <id>okapies</id>
+            <name>Yuta Okamoto</name>
+            <email>okapies@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/pfnet-research/menoh-java</url>
+        <connection>scm:git:https://github.com/pfnet-research/menoh-java.git</connection>
+        <developerConnection>scm:git:git@github.com:pfnet-research/menoh-java.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -60,6 +80,25 @@
     </licenses>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+              <groupId>org.sonatype.plugins</groupId>
+              <artifactId>nexus-staging-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>
