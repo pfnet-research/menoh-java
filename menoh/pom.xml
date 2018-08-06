@@ -7,7 +7,7 @@
     <parent>
         <groupId>jp.preferred.menoh</groupId>
         <artifactId>menoh-parent</artifactId>
-        <version>0.1.0</version>
+        <version>0.2.0-SNAPSHOT</version>
     </parent>
 
     <groupId>jp.preferred.menoh</groupId>
