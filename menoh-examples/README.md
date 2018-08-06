@@ -2,16 +2,7 @@
 *Non*-adversarial code examples in menoh-java.
 
 ## Requirements
-See the ["Installation"](../README.md#installation) section in README.
-
-## Setup
-You need to run the following to install `menoh` package to the local repository before executing examples.
-
-```bash
-$ git clone https://github.com/pfnet-research/menoh-java.git
-$ cd menoh-java
-$ mvn install
-```
+See the ["Getting Started"](../README.md#getting-started) section in README.
 
 ## Usage
 

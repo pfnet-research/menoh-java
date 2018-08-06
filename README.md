@@ -3,24 +3,29 @@
 
 This is a Java binding for [Menoh](https://github.com/pfnet-research/menoh/) DNN inference library, which supports [ONNX](http://onnx.ai/) model format.
 
-## Installation
-This package depends on the [Menoh](https://github.com/pfnet-research/menoh/) native shared library to maximize the utilization of hardware resources. You need to [install](https://github.com/pfnet-research/menoh/blob/master/README.md#installation-using-package-manager-or-binary-packages) it to the JVM classpath or the system library path before running.
+## Getting Started
 
-### Linux
-TODO
+### Add a dependency
+Using Gradle:
 
-### Mac OS
-Use [pfnet-research/homebrew-menoh](https://github.com/pfnet-research/homebrew-menoh).
-
-```
-brew tap pfnet-research/menoh
-brew install menoh
+```groovy
+dependencies {
+  implementation 'jp.preferred.menoh:menoh:0.1.0'
+}
 ```
 
-### Windows
-Download the following binaries from the [release page](https://github.com/pfnet-research/menoh/releases) in Menoh repository and place it to the classpath.
+Using Maven:
 
-- menoh_prebuild_win_v?.?.?.zip
+```xml
+<dependency>
+    <groupId>jp.preferred.menoh</groupId>
+    <artifactId>menoh</artifactId>
+    <version>0.1.0</version>
+</dependency>
+```
+
+### Install native libraries
+menoh-java requires the native Menoh and its dependent native shared libraries to maximize the utilization of hardware resources. You need to [install](https://github.com/pfnet-research/menoh/blob/master/README.md#installation-using-package-manager-or-binary-packages) them to the JVM classpath or the system library path before running.
 
 ## Examples
 Please see [menoh-examples](menoh-examples) directory in this repository.
@@ -78,7 +83,7 @@ Once you create the `ModelRunner`, you can `run()` the model with input data aga
 ### Low-level API
 The low-level API consists of `ModelData`, `VariableProfileTable` and `Model`. You don't need to use them in most cases other than managing lifecycle of the builder objects and the variable buffers by hand.
 
-## Build
+## Building from Source
 ```bash
 $ git clone https://github.com/pfnet-research/menoh-java.git
 $ cd menoh-java
