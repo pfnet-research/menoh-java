@@ -2,7 +2,7 @@
 *Non*-adversarial code examples in menoh-java.
 
 ## Requirements
-The examples requires Menoh Core in the JNA search path. See the ["Getting Started"](../README.md#getting-started) section in README document.
+The examples requires the native Menoh Core library in the JNA search path. See the ["Getting Started"](../README.md#getting-started) section in README document.
 
 ## Usage
 

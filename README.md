@@ -95,7 +95,7 @@ Note that `mvn test` requires that Menoh Core is available in the [JNA search pa
 ## FAQ
 
 ### menoh-java fails with `java.lang.UnsatisfiedLinkError`
-menoh-java depends on Menoh Core native shared library. You'll get `java.lang.UnsatisfiedLinkError` at startup if it isn't located in [JNA search path](http://java-native-access.github.io/jna/4.5.2/javadoc/com/sun/jna/NativeLibrary.html) even if it exists in the local system.
+menoh-java depends on the native Menoh Core library. You'll get `java.lang.UnsatisfiedLinkError` at startup if it isn't located in [JNA search path](http://java-native-access.github.io/jna/4.5.2/javadoc/com/sun/jna/NativeLibrary.html) even if it exists in the local system.
 
 ```
 java.lang.UnsatisfiedLinkError: Unable to load library 'menoh': Native library (win32-x86-64/menoh.dll) not found in resource path ([file:/C:/workspace/menoh-java/menoh-examples/target/classes/, file:/C:/Users/user/.m2/repository/jp/preferred/menoh/menoh/1.0.0-SNAPSHOT/menoh-1.0.0-SNAPSHOT.jar, file:/C:/Users/user/.m2/repository/net/java/dev/jna/jna/4.5.2/jna-4.5.2.jar])
