@@ -25,7 +25,7 @@ Using Maven:
 ```
 
 ### Install native libraries
-menoh-java requires the native Menoh and its dependent native shared libraries to maximize the utilization of hardware resources. You need to [install](https://github.com/pfnet-research/menoh/blob/master/README.md#installation-using-package-manager-or-binary-packages) them to the JVM classpath or the system library path before running.
+menoh-java requires [Menoh Core](https://github.com/pfnet-research/menoh/) and its dependent native shared libraries to maximize the utilization of hardware resources. You need to [install](https://github.com/pfnet-research/menoh/blob/master/README.md#installation-using-package-manager-or-binary-packages) them to the JVM classpath or the system library path before running.
 
 ## Examples
 Please see [menoh-examples](menoh-examples) directory in this repository.
@@ -90,12 +90,12 @@ $ cd menoh-java
 $ mvn package
 ```
 
-Note that `mvn test` requires that the Menoh native is available in the local system.
+Note that `mvn test` requires that Menoh Core is available in the [JNA search path](http://java-native-access.github.io/jna/4.5.2/javadoc/com/sun/jna/NativeLibrary.html).
 
 ## FAQ
 
 ### menoh-java fails with `java.lang.UnsatisfiedLinkError`
-menoh-java depends on the Menoh native shared library. You'll get `java.lang.UnsatisfiedLinkError` at startup if it isn't located in [JNA search path](http://java-native-access.github.io/jna/4.5.2/javadoc/com/sun/jna/NativeLibrary.html) even if it exists in the local system.
+menoh-java depends on Menoh Core native shared library. You'll get `java.lang.UnsatisfiedLinkError` at startup if it isn't located in [JNA search path](http://java-native-access.github.io/jna/4.5.2/javadoc/com/sun/jna/NativeLibrary.html) even if it exists in the local system.
 
 ```
 java.lang.UnsatisfiedLinkError: Unable to load library 'menoh': Native library (win32-x86-64/menoh.dll) not found in resource path ([file:/C:/workspace/menoh-java/menoh-examples/target/classes/, file:/C:/Users/user/.m2/repository/jp/preferred/menoh/menoh/1.0.0-SNAPSHOT/menoh-1.0.0-SNAPSHOT.jar, file:/C:/Users/user/.m2/repository/net/java/dev/jna/jna/4.5.2/jna-4.5.2.jar])
