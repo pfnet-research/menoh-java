@@ -18,7 +18,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 /**
- * <p>Classify an input image by using VGG16, a CNN-based pre-trained model.</p> See the
+ * <p>Classify an input image by using VGG16, a pre-trained CNN model.</p> See the
  * <a href="https://pfnet-research.github.io/menoh/md_tutorial.html">Menoh tutorial</a> for the details.</p>
  */
 public class Vgg16 {

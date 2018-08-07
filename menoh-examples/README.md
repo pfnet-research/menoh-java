@@ -2,12 +2,12 @@
 *Non*-adversarial code examples in menoh-java.
 
 ## Requirements
-See the ["Getting Started"](../README.md#getting-started) section in README.
+The examples requires Menoh Core in the JNA search path. See the ["Getting Started"](../README.md#getting-started) section in README document.
 
 ## Usage
 
 ### VGG16
-Classify an input image by using VGG16, a CNN-based pre-trained model. See the [Menoh tutorial](https://pfnet-research.github.io/menoh/md_tutorial.html) for the details.
+Classify an input image by using VGG16, a pre-trained CNN model. See the [Menoh tutorial](https://pfnet-research.github.io/menoh/md_tutorial.html) for the details.
 
 ```bash
 $ cd menoh-examples
