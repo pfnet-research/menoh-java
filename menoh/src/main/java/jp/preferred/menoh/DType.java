@@ -4,6 +4,7 @@ package jp.preferred.menoh;
  * A data type.
  */
 public enum DType {
+    UNDEFINED(-1), // values[0]
     FLOAT(0);
 
     private final int id;
@@ -36,8 +37,9 @@ public enum DType {
      * Returns the enum constant of the specified enum type with the specified ID.
      */
     public static DType valueOf(int value) throws MenohException {
-        if (0 <= value && value < values.length) {
-            final DType ret = values[value];
+        final int index = value + 1;
+        if (1 <= index && index < values.length) {
+            final DType ret = values[index];
             assert ret.id == value;
 
             return ret;
