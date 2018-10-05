@@ -68,9 +68,9 @@ public class ModelDataTest {
                 () -> assertEquals(ErrorCode.UNSUPPORTED_ONNX_OPSET_VERSION, e.getErrorCode()),
                 () -> assertEquals(
                         String.format(
-                                "menoh unsupported onnx opset version error: %s has "
-                                        + "onnx opset version %d > %d (unsupported_onnx_opset_version)",
-                                path, 127, 7),
+                                "menoh unsupported onnx opset version error: given onnx "
+                                        + "has opset version %d > %d (unsupported_onnx_opset_version)",
+                                127, 8),
                         e.getMessage())
         );
     }
@@ -83,7 +83,7 @@ public class ModelDataTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {1, 2})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData)
         ) {
             modelData.optimize(vpt);

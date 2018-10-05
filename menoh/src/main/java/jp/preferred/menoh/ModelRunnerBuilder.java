@@ -84,12 +84,25 @@ public class ModelRunnerBuilder implements AutoCloseable {
     }
 
     /**
-     * Adds an output profile to configure the specified variable in the model.
+     * Adds an output name to configure the specified variable in the model.
      *
      * @return this object
      */
+    public ModelRunnerBuilder addOutputName(String name) {
+        vptBuilder.addOutputName(name);
+        return this;
+    }
+
+    /**
+     * Adds an output profile to configure the specified variable in the model.
+     *
+     * @deprecated Use {@link #addOutputName(String)} instead
+     *
+     * @return this object
+     */
+    @Deprecated
     public ModelRunnerBuilder addOutputProfile(String name, DType dtype) {
-        vptBuilder.addOutputProfile(name, dtype);
+        vptBuilder.addOutputName(name);
         return this;
     }
 

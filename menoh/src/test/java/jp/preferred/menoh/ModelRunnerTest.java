@@ -23,7 +23,7 @@ public class ModelRunnerTest {
                 ModelRunnerBuilder builder = ModelRunner
                         .fromOnnxFile(path)
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT)
+                        .addOutputName("output")
                         .attachExternalBuffer("input", inputData1)
                         .backendName("mkldnn")
                         .backendConfig("");
@@ -88,7 +88,7 @@ public class ModelRunnerTest {
         final ModelRunnerBuilder builder = ModelRunner
                 .fromOnnxFile(path)
                 .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                .addOutputProfile("output", DType.FLOAT)
+                .addOutputName("output")
                 .attachExternalBuffer("input", inputData)
                 .backendName("mkldnn")
                 .backendConfig("");

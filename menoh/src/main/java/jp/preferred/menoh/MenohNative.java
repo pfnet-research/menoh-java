@@ -22,10 +22,17 @@ interface MenohNative extends Library {
 
     void menoh_delete_variable_profile_table_builder(Pointer builder);
 
+    int menoh_variable_profile_table_builder_add_input_profile(Pointer builder, String name, int dtype, int dims_size, Pointer dims);
+
+    @Deprecated
     int menoh_variable_profile_table_builder_add_input_profile_dims_2(Pointer builder, String name, int dtype, int num, int size);
 
+    @Deprecated
     int menoh_variable_profile_table_builder_add_input_profile_dims_4(Pointer builder, String name, int dtype, int num, int channel, int height, int width);
 
+    int menoh_variable_profile_table_builder_add_output_name(Pointer builder, String name);
+
+    @Deprecated
     int menoh_variable_profile_table_builder_add_output_profile(Pointer builder, String name, int dtype);
 
     int menoh_build_variable_profile_table(Pointer builder, Pointer model_data, PointerByReference dst_handle);

@@ -65,12 +65,33 @@ class BufferUtils {
      * @return the pointer to the allocated native memory
      * @throws IllegalArgumentException if <code>values</code> is null or empty
      */
+    static Pointer copyToNativeMemory(final int[] values, final int offset, final int length) {
+        if (values == null || values.length <= 0) {
+            throw new IllegalArgumentException("values must not be null or empty");
+        }
+
+        final Memory mem = new Memory((long) length * Native.getNativeSize(Integer.TYPE));
+        mem.write(0, values, offset, length);
+
+        return mem.share(0, length);
+    }
+
+    /**
+     * <p>Copies the array to a newly allocated memory in the native heap.</p>
+     *
+     * @param values the non-empty array from which to copy
+     * @param offset the array index from which to start copying
+     * @param length the number of elements from <code>values</code> that must be copied
+     *
+     * @return the pointer to the allocated native memory
+     * @throws IllegalArgumentException if <code>values</code> is null or empty
+     */
     static Pointer copyToNativeMemory(final float[] values, final int offset, final int length) {
         if (values == null || values.length <= 0) {
             throw new IllegalArgumentException("values must not be null or empty");
         }
 
-        final Memory mem = new Memory((long) length * 4);
+        final Memory mem = new Memory((long) length * Native.getNativeSize(Float.TYPE));
         mem.write(0, values, offset, length);
 
         return mem.share(0, length);

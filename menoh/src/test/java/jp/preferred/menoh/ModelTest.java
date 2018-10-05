@@ -22,7 +22,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
@@ -48,7 +48,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData)
         ) {
             final ModelBuilder modelBuilder = Model.builder(vpt);
@@ -88,7 +88,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
@@ -119,7 +119,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
@@ -166,7 +166,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData)
         ) {
             try (ModelBuilder modelBuilder = Model.builder(vpt)) {
@@ -208,7 +208,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
@@ -241,7 +241,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder = Model.builder(vpt); // test case
                 Model model = modelBuilder.build(modelData, "mkldnn", "")
@@ -302,7 +302,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder =
                         Model.builder(vpt).attachExternalBuffer("input", inputDataBuf);
@@ -365,7 +365,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder =
                         Model.builder(vpt).attachExternalBuffer("input", inputDataBuf);
@@ -415,7 +415,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder =
                         Model.builder(vpt).attachExternalBuffer("input", readOnlyInputDataBuf);
@@ -461,7 +461,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder =
                         Model.builder(vpt).attachExternalBuffer("input", inputData);

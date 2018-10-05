@@ -138,6 +138,86 @@ public class BufferUtilsTest {
     }
 
     @Test
+    public void copyIntArrayToNativeMemory() {
+        final int[] values = new int[] {0, 1, 2, 3};
+        final ByteBuffer valuesBuf = ByteBuffer.allocate(values.length * 4).order(ByteOrder.nativeOrder());
+        valuesBuf.asIntBuffer().put(values);
+        final int offset = 0;
+        final int length = values.length;
+
+        final Pointer ptr = BufferUtils.copyToNativeMemory(values, offset, length);
+        assertNotNull(ptr);
+        assertAll("copied values in native memory",
+                () -> assertArrayEquals(values, ptr.getIntArray(0, length)),
+                // check the byte order
+                () -> assertArrayEquals(valuesBuf.array(), ptr.getByteArray(0, length * 4))
+        );
+    }
+
+    @Test
+    public void copySlicedIntArrayToNativeMemory() {
+        final int[] values = new int[] {0, 1, 2, 3};
+        final int[] slicedValues = new int[] {1, 2};
+        final ByteBuffer slicedValuesBuf = ByteBuffer.allocate(slicedValues.length * 4).order(ByteOrder.nativeOrder());
+        slicedValuesBuf.asIntBuffer().put(slicedValues);
+        final int offset = 1;
+        final int length = slicedValues.length;
+
+        // slice 2 elements (8 bytes)
+        final Pointer ptr = BufferUtils.copyToNativeMemory(values, offset, length);
+        assertNotNull(ptr);
+        assertAll("copied values in native memory",
+                () -> assertArrayEquals(slicedValues, ptr.getIntArray(0, length)),
+                // check the byte order
+                () -> assertArrayEquals(slicedValuesBuf.array(), ptr.getByteArray(0, length * 4))
+        );
+    }
+
+    @Test
+    public void copyEmptyIntArrayToNativeMemory() {
+        final int[] values = new int[] {}; // test case
+        final int offset = 0;
+        final int length = values.length;
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> BufferUtils.copyToNativeMemory(values, offset, length));
+    }
+
+    @Test
+    public void copyNullIntArrayToNativeMemory() {
+        final int[] values = null; // test case
+        final int offset = 0;
+        final int length = 0;
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> BufferUtils.copyToNativeMemory(values, offset, length));
+    }
+
+    @Test
+    public void copyNegativeOffsetIntArrayToNativeMemory() {
+        final int[] values = new int[] {0, 1, 2, 3};
+        final int offset = -1; // test case
+        final int length = values.length;
+
+        assertThrows(
+                ArrayIndexOutOfBoundsException.class,
+                () -> BufferUtils.copyToNativeMemory(values, offset, length));
+    }
+
+    @Test
+    public void copyNegativeLengthIntArrayToNativeMemory() {
+        final int[] values = new int[] {0, 1, 2, 3};
+        final int offset = 0;
+        final int length = -1; // test case
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> BufferUtils.copyToNativeMemory(values, offset, length));
+    }
+
+    @Test
     public void copyFloatArrayToNativeMemory() {
         final float[] values = new float[] {0f, 1f, 2f, 3f};
         final ByteBuffer valuesBuf = ByteBuffer.allocate(values.length * 4).order(ByteOrder.nativeOrder());
