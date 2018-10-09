@@ -5,6 +5,10 @@ import static jp.preferred.menoh.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 // CHECKSTYLE:ON
 
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
 public class ModelDataTest {
@@ -12,21 +16,46 @@ public class ModelDataTest {
     public void makeFromValidOnnxFile() throws Exception {
         final String path = getResourceFilePath("models/and_op.onnx");
 
-        try (ModelData modelData = ModelData.fromOnnxFile(path)) {
+        try (ModelData modelData = ModelData.fromOnnxFile(path)) { // loaded from a file
+            assertNotNull(modelData.nativeHandle());
+        }
+    }
+
+    @Test
+    public void makeFromValidByteArrayData() throws Exception {
+        final InputStream in = getClass().getClassLoader().getResourceAsStream("models/and_op.onnx");
+        final byte[] data = IOUtils.toByteArray(in);
+
+        try (ModelData modelData = ModelData.fromOnnxData(data)) { // loaded from memory
+            assertNotNull(modelData.nativeHandle());
+        }
+    }
+
+    @Test
+    public void makeFromValidByteBufferData() throws Exception {
+        final InputStream in = getClass().getClassLoader().getResourceAsStream("models/and_op.onnx");
+        final ByteBuffer data = ByteBuffer.wrap(IOUtils.toByteArray(in));
+
+        try (ModelData modelData = ModelData.fromOnnxData(data)) { // loaded from memory
             assertNotNull(modelData.nativeHandle());
         }
     }
 
     @Test
     public void closeModelData() throws Exception {
-        final String path = getResourceFilePath("models/and_op.onnx");
+        final InputStream in = getClass().getClassLoader().getResourceAsStream("models/and_op.onnx");
+        final byte[] data = IOUtils.toByteArray(in);
 
-        final ModelData modelData = ModelData.fromOnnxFile(path);
+        final ModelData modelData = ModelData.fromOnnxData(data); // loaded from memory
         try {
             assertNotNull(modelData.nativeHandle());
+            assertNotNull(modelData.nativeDataPointer());
+            assertFalse(modelData.nativeDataPointer().isDisposed());
         } finally {
             modelData.close();
             assertNull(modelData.nativeHandle());
+            assertNotNull(modelData.nativeDataPointer());
+            assertTrue(modelData.nativeDataPointer().isDisposed());
 
             // close() is an idempotent operation
             modelData.close();
@@ -46,6 +75,20 @@ public class ModelDataTest {
     }
 
     @Test
+    public void makeFromEmptyByteArrayData() throws Exception {
+        final byte[] data = new byte[0]; // test case
+
+        assertThrows(IllegalArgumentException.class, () -> ModelData.fromOnnxData(data));
+    }
+
+    @Test
+    public void makeFromEmptyByteBufferData() throws Exception {
+        final ByteBuffer data = ByteBuffer.wrap(new byte[0]); // test case
+
+        assertThrows(IllegalArgumentException.class, () -> ModelData.fromOnnxData(data));
+    }
+
+    @Test
     public void makeFromInvalidOnnxFile() throws Exception {
         final String path = getResourceFilePath("models/invalid_format.onnx");
 
@@ -54,6 +97,36 @@ public class ModelDataTest {
                 () -> assertEquals(ErrorCode.ONNX_PARSE_ERROR, e.getErrorCode()),
                 () -> assertEquals(
                         String.format("menoh onnx parse error: %s (onnx_parse_error)", path),
+                        e.getMessage())
+        );
+    }
+
+    @Test
+    public void makeFromInvalidByteArrayData() throws Exception {
+        final InputStream in =
+                ModelDataTest.class.getClassLoader().getResourceAsStream("models/invalid_format.onnx");
+        final byte[] data = IOUtils.toByteArray(in);
+
+        MenohException e = assertThrows(MenohException.class, () -> ModelData.fromOnnxData(data));
+        assertAll("invalid onnx file",
+                () -> assertEquals(ErrorCode.ONNX_PARSE_ERROR, e.getErrorCode()),
+                () -> assertEquals(
+                        String.format("menoh onnx parse error: parse binary onnx data on memory (onnx_parse_error)"),
+                        e.getMessage())
+        );
+    }
+
+    @Test
+    public void makeFromInvalidByteBufferData() throws Exception {
+        final InputStream in =
+                ModelDataTest.class.getClassLoader().getResourceAsStream("models/invalid_format.onnx");
+        final ByteBuffer data = ByteBuffer.wrap(IOUtils.toByteArray(in));
+
+        MenohException e = assertThrows(MenohException.class, () -> ModelData.fromOnnxData(data));
+        assertAll("invalid onnx file",
+                () -> assertEquals(ErrorCode.ONNX_PARSE_ERROR, e.getErrorCode()),
+                () -> assertEquals(
+                        String.format("menoh onnx parse error: parse binary onnx data on memory (onnx_parse_error)"),
                         e.getMessage())
         );
     }

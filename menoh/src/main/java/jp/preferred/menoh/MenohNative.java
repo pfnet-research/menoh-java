@@ -14,6 +14,8 @@ interface MenohNative extends Library {
 
     int menoh_make_model_data_from_onnx(String onnx_filename, PointerByReference dst_handle);
 
+    int menoh_make_model_data_from_onnx_data_on_memory(Pointer onnx_data, int size, PointerByReference dst_handle);
+
     void menoh_delete_model_data(Pointer model_data);
 
     int menoh_model_data_optimize(Pointer model_data, Pointer variable_profile_table);

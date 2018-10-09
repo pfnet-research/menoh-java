@@ -39,10 +39,11 @@ public class VariableProfileTableBuilder implements AutoCloseable {
      * @return this object
      */
     public VariableProfileTableBuilder addInputProfile(String name, DType dtype, int[] dims) throws MenohException {
-        final Pointer dimsPtr = copyToNativeMemory(dims, 0, dims.length);
-        checkError(
-                MenohNative.INSTANCE.menoh_variable_profile_table_builder_add_input_profile(
-                        handle, name, dtype.getId(), dims.length, dimsPtr));
+        try (final DisposableMemory dimsPtr = copyToNativeMemory(dims, 0, dims.length)) {
+            checkError(
+                    MenohNative.INSTANCE.menoh_variable_profile_table_builder_add_input_profile(
+                            handle, name, dtype.getId(), dims.length, dimsPtr.share(0, dims.length)));
+        }
 
         return this;
     }

@@ -5,12 +5,15 @@ import static jp.preferred.menoh.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 // CHECKSTYLE:ON
 
+import java.io.InputStream;
+
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
 public class ModelRunnerTest {
     @Test
     public void runModelRunner() throws Exception {
-        final String path = getResourceFilePath("models/and_op.onnx");
+        final String path = getResourceFilePath("models/and_op.onnx"); // loaded from file
         final int batchSize = 4;
         final int inputDim = 2;
         final float[] inputData1 = new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f};
@@ -21,7 +24,7 @@ public class ModelRunnerTest {
 
         try (
                 ModelRunnerBuilder builder = ModelRunner
-                        .fromOnnxFile(path)
+                        .fromOnnxFile(path) // loaded from a file
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                         .addOutputName("output")
                         .attachExternalBuffer("input", inputData1)
@@ -31,7 +34,8 @@ public class ModelRunnerTest {
         ) {
             assertAll("model data in builder",
                     () -> assertNotNull(builder.modelData()),
-                    () -> assertNotNull(builder.modelData().nativeHandle())
+                    () -> assertNotNull(builder.modelData().nativeHandle()),
+                    () -> assertNull(builder.modelData().nativeDataPointer()) // loaded from file directly
             );
             assertAll("vpt builder in builder",
                     () -> assertNotNull(builder.vptBuilder()),
@@ -80,13 +84,14 @@ public class ModelRunnerTest {
 
     @Test
     public void closeModelRunner() throws Exception {
-        final String path = getResourceFilePath("models/and_op.onnx");
+        final InputStream in = getClass().getClassLoader().getResourceAsStream("models/and_op.onnx");
+        final byte[] data = IOUtils.toByteArray(in);
         final int batchSize = 4;
         final int inputDim = 2;
         final float[] inputData = new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f};
 
         final ModelRunnerBuilder builder = ModelRunner
-                .fromOnnxFile(path)
+                .fromOnnxData(data) // loaded from memory
                 .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                 .addOutputName("output")
                 .attachExternalBuffer("input", inputData)
@@ -97,7 +102,9 @@ public class ModelRunnerTest {
             assertNotNull(builder);
             assertAll("model data in builder",
                     () -> assertNotNull(builder.modelData()),
-                    () -> assertNotNull(builder.modelData().nativeHandle())
+                    () -> assertNotNull(builder.modelData().nativeHandle()),
+                    () -> assertNotNull(builder.modelData().nativeDataPointer()),
+                    () -> assertFalse(builder.modelData().nativeDataPointer().isDisposed())
             );
             assertAll("vpt builder in builder",
                     () -> assertNotNull(builder.vptBuilder()),
@@ -121,7 +128,9 @@ public class ModelRunnerTest {
             builder.close();
             assertAll("model data in builder",
                     () -> assertNotNull(builder.modelData()),
-                    () -> assertNull(builder.modelData().nativeHandle())
+                    () -> assertNull(builder.modelData().nativeHandle()),
+                    () -> assertNotNull(builder.modelData().nativeDataPointer()),
+                    () -> assertTrue(builder.modelData().nativeDataPointer().isDisposed())
             );
             assertAll("vpt builder in builder",
                     () -> assertNotNull(builder.vptBuilder()),

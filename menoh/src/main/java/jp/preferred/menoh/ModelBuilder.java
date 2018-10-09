@@ -1,5 +1,6 @@
 package jp.preferred.menoh;
 
+import static jp.preferred.menoh.BufferUtils.convertToNativeMemory;
 import static jp.preferred.menoh.BufferUtils.copyToNativeMemory;
 import static jp.preferred.menoh.MenohException.checkError;
 
@@ -70,7 +71,19 @@ public class ModelBuilder implements AutoCloseable {
      * @throws IllegalArgumentException if <code>buffer</code> is null or empty
      */
     public ModelBuilder attachExternalBuffer(String variableName, ByteBuffer buffer) throws MenohException {
-        final Pointer bufferHandle = copyToNativeMemory(buffer);
+        if (buffer == null || buffer.remaining() <= 0) {
+            throw new IllegalArgumentException("data must not be null or empty");
+        }
+
+        final Pointer bufferHandle;
+        if (buffer.isDirect()) {
+            bufferHandle = convertToNativeMemory(buffer);
+        } else {
+            // TODO: free the allocated memory explicitly after all models and its builder is closed
+            // (JVM will invoke Memory#dispose() after bufferHandle is GCed)
+            bufferHandle = copyToNativeMemory(buffer);
+        }
+
         synchronized (this) {
             externalBuffers.add(bufferHandle);
         }
