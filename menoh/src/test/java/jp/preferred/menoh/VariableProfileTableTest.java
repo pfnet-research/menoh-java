@@ -173,9 +173,8 @@ public class VariableProfileTableTest {
                     () -> assertEquals(ErrorCode.DIMENSION_MISMATCH, e.getErrorCode()),
                     () -> assertEquals(
                             String.format(
-                                    "menoh dimension mismatch error: Gemm issuing \"%s\": input[1] and weight[1] "
-                                            + "actual value: %d valid value: %d (dimension_mismatch)",
-                                    "140211424823896", // the name of output[0] in Gemm layer
+                                    "menoh dimension mismatch error: Gemm issuing \"input\": trans(A)[1] and "
+                                            + "trans(B)[0]) actual value: %d valid value: %d (dimension_mismatch)",
                                     3, 2),
                             e.getMessage())
             );
