@@ -145,10 +145,10 @@ public class VariableProfileTableTest {
         ) {
             MenohException e = assertThrows(MenohException.class, () -> vptBuilder.build(modelData));
             assertAll("input profile name not found",
-                    () -> assertEquals(ErrorCode.VARIABLE_NOT_FOUND, e.getErrorCode()),
+                    () -> assertEquals(ErrorCode.INPUT_NOT_FOUND_ERROR, e.getErrorCode()),
                     () -> assertEquals(
-                            String.format("menoh variable not found error: %s (variable_not_found)",
-                                    inputVariableNameInModel), // not `inputProfileName`
+                            String.format("menoh input not found error: %s (input_not_found_error)",
+                                    inputProfileName),
                             e.getMessage())
             );
         }
@@ -197,9 +197,10 @@ public class VariableProfileTableTest {
         ) {
             MenohException e = assertThrows(MenohException.class, () -> vptBuilder.build(modelData));
             assertAll("output profile name not found",
-                    () -> assertEquals(ErrorCode.VARIABLE_NOT_FOUND, e.getErrorCode()),
+                    () -> assertEquals(ErrorCode.OUTPUT_NOT_FOUND_ERROR, e.getErrorCode()),
                     () -> assertEquals(
-                            String.format("menoh variable not found error: %s (variable_not_found)", outputProfileName),
+                            String.format("menoh output not found error: %s (output_not_found_error)",
+                                    outputProfileName),
                             e.getMessage())
             );
         }

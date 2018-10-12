@@ -21,7 +21,7 @@ public class ErrorCodeTest {
     public void valueOfValidErrorCode() {
         assertAll("valid ErrorCodes",
                 () -> assertEquals(ErrorCode.SUCCESS, ErrorCode.valueOf(0)),
-                () -> assertEquals(ErrorCode.UNSUPPORTED_INPUT_DIMS, ErrorCode.valueOf(18))
+                () -> assertEquals(ErrorCode.OUTPUT_NOT_FOUND_ERROR, ErrorCode.valueOf(23))
         );
     }
 
@@ -33,7 +33,7 @@ public class ErrorCodeTest {
                     assertEquals(ErrorCode.UNDEFINED, e.getErrorCode());
                 },
                 () -> {
-                    MenohException e = assertThrows(MenohException.class, () -> ErrorCode.valueOf(18 + 1));
+                    MenohException e = assertThrows(MenohException.class, () -> ErrorCode.valueOf(23 + 1));
                     assertEquals(ErrorCode.UNDEFINED, e.getErrorCode());
                 });
     }
