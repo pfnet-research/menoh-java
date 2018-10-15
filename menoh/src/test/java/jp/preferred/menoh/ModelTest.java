@@ -247,8 +247,8 @@ public class ModelTest {
             assertAll("backendName is invalid",
                     () -> assertEquals(ErrorCode.UNSUPPORTED_INPUT_DIMS, e.getErrorCode()),
                     () -> assertEquals(
-                            String.format("menoh unsupported input dims error: input has dims size: " +
-                                    "%d (unsupported_input_dims)", dims.length),
+                            String.format("menoh unsupported input dims error: input has dims size: "
+                                    + "%d (unsupported_input_dims)", dims.length),
                             e.getMessage())
             );
         }
