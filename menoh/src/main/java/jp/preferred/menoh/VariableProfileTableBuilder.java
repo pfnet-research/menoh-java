@@ -34,7 +34,11 @@ public class VariableProfileTableBuilder implements AutoCloseable {
     }
 
     /**
-     * Adds an input profile to configure the specified variable in the model.
+     * <p>Adds an input profile to configure the specified variable in the model.</p>
+     *
+     * <p>Note that some backends only accept the specified length of <code>shape</code>. In this case,
+     * <code>ModelBuilder#build()</code> or <code>ModelRunnerBuilder#build()</code> will throw
+     * <code>MenohException</code> with <code>UNSUPPORTED_INPUT_DIMS</code> error code.</p>
      *
      * @return this object
      */
@@ -49,7 +53,7 @@ public class VariableProfileTableBuilder implements AutoCloseable {
     }
 
     /**
-     * Adds an output name to configure the specified variable in the model.
+     * <p>Adds an output name to configure the specified variable in the model.</p>
      *
      * @return this object
      */

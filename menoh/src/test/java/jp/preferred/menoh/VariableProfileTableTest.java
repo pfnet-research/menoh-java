@@ -129,12 +129,34 @@ public class VariableProfileTableTest {
     }
 
     @Test
+    public void buildVariableProfileTableIfVariableNotFound() throws Exception {
+        final String path = getResourceFilePath("models/and_op.onnx");
+        final String inputVariableNameInModel = "input";
+        final String outputProfileName = "output";
+
+        try (
+                ModelData modelData = ModelData.fromOnnxFile(path);
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        // test case (no addInputProfile for "input" variable)
+                        .addOutputName(outputProfileName)
+        ) {
+            MenohException e = assertThrows(MenohException.class, () -> vptBuilder.build(modelData));
+            assertAll("input profile name not found",
+                    () -> assertEquals(ErrorCode.VARIABLE_NOT_FOUND, e.getErrorCode()),
+                    () -> assertEquals(
+                            String.format("menoh variable not found error: %s (variable_not_found)",
+                                    inputVariableNameInModel),
+                            e.getMessage())
+            );
+        }
+    }
+
+    @Test
     public void buildVariableProfileTableIfInputProfileNameNotFound() throws Exception {
         final String path = getResourceFilePath("models/and_op.onnx");
         final int batchSize = 1;
         final int inputDim = 2;
         final String inputProfileName = "__non_existent_variable__"; // test case
-        final String inputVariableNameInModel = "input";
         final String outputProfileName = "output";
 
         try (

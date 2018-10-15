@@ -91,7 +91,7 @@ public class ModelRunnerTest {
         final float[] inputData = new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f};
 
         final ModelRunnerBuilder builder = ModelRunner
-                .fromOnnxData(data) // loaded from memory
+                .fromOnnx(data) // loaded from memory
                 .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
                 .addOutputName("output")
                 .attachExternalBuffer("input", inputData)

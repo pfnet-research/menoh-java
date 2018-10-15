@@ -22,21 +22,21 @@ public class ModelDataTest {
     }
 
     @Test
-    public void makeFromValidByteArrayData() throws Exception {
+    public void makeFromValidByteArray() throws Exception {
         final InputStream in = getClass().getClassLoader().getResourceAsStream("models/and_op.onnx");
         final byte[] data = IOUtils.toByteArray(in);
 
-        try (ModelData modelData = ModelData.fromOnnxData(data)) { // loaded from memory
+        try (ModelData modelData = ModelData.fromOnnx(data)) { // loaded from memory
             assertNotNull(modelData.nativeHandle());
         }
     }
 
     @Test
-    public void makeFromValidByteBufferData() throws Exception {
+    public void makeFromValidByteBuffer() throws Exception {
         final InputStream in = getClass().getClassLoader().getResourceAsStream("models/and_op.onnx");
         final ByteBuffer data = ByteBuffer.wrap(IOUtils.toByteArray(in));
 
-        try (ModelData modelData = ModelData.fromOnnxData(data)) { // loaded from memory
+        try (ModelData modelData = ModelData.fromOnnx(data)) { // loaded from memory
             assertNotNull(modelData.nativeHandle());
         }
     }
@@ -46,7 +46,7 @@ public class ModelDataTest {
         final InputStream in = getClass().getClassLoader().getResourceAsStream("models/and_op.onnx");
         final byte[] data = IOUtils.toByteArray(in);
 
-        final ModelData modelData = ModelData.fromOnnxData(data); // loaded from memory
+        final ModelData modelData = ModelData.fromOnnx(data); // loaded from memory
         try {
             assertNotNull(modelData.nativeHandle());
             assertNotNull(modelData.nativeDataPointer());
@@ -75,17 +75,17 @@ public class ModelDataTest {
     }
 
     @Test
-    public void makeFromEmptyByteArrayData() throws Exception {
+    public void makeFromEmptyByteArray() throws Exception {
         final byte[] data = new byte[0]; // test case
 
-        assertThrows(IllegalArgumentException.class, () -> ModelData.fromOnnxData(data));
+        assertThrows(IllegalArgumentException.class, () -> ModelData.fromOnnx(data));
     }
 
     @Test
-    public void makeFromEmptyByteBufferData() throws Exception {
+    public void makeFromEmptyByteBuffer() throws Exception {
         final ByteBuffer data = ByteBuffer.wrap(new byte[0]); // test case
 
-        assertThrows(IllegalArgumentException.class, () -> ModelData.fromOnnxData(data));
+        assertThrows(IllegalArgumentException.class, () -> ModelData.fromOnnx(data));
     }
 
     @Test
@@ -102,12 +102,12 @@ public class ModelDataTest {
     }
 
     @Test
-    public void makeFromInvalidByteArrayData() throws Exception {
+    public void makeFromInvalidByteArray() throws Exception {
         final InputStream in =
                 ModelDataTest.class.getClassLoader().getResourceAsStream("models/invalid_format.onnx");
         final byte[] data = IOUtils.toByteArray(in);
 
-        MenohException e = assertThrows(MenohException.class, () -> ModelData.fromOnnxData(data));
+        MenohException e = assertThrows(MenohException.class, () -> ModelData.fromOnnx(data));
         assertAll("invalid onnx file",
                 () -> assertEquals(ErrorCode.ONNX_PARSE_ERROR, e.getErrorCode()),
                 () -> assertEquals(
@@ -117,12 +117,12 @@ public class ModelDataTest {
     }
 
     @Test
-    public void makeFromInvalidByteBufferData() throws Exception {
+    public void makeFromInvalidByteBuffer() throws Exception {
         final InputStream in =
                 ModelDataTest.class.getClassLoader().getResourceAsStream("models/invalid_format.onnx");
         final ByteBuffer data = ByteBuffer.wrap(IOUtils.toByteArray(in));
 
-        MenohException e = assertThrows(MenohException.class, () -> ModelData.fromOnnxData(data));
+        MenohException e = assertThrows(MenohException.class, () -> ModelData.fromOnnx(data));
         assertAll("invalid onnx file",
                 () -> assertEquals(ErrorCode.ONNX_PARSE_ERROR, e.getErrorCode()),
                 () -> assertEquals(

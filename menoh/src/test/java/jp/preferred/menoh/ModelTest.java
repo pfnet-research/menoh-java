@@ -226,6 +226,35 @@ public class ModelTest {
     }
 
     @Test
+    public void buildModelIfUnsupportedInputDims() throws Exception {
+        final String path = getResourceFilePath("models/and_op.onnx");
+        final int[] dims = {4, 2, 1, 1, 1}; // test case (length == 5 is not supported in mkldnn backend)
+        final String backendName = "mkldnn";
+        final String backendConfig = "";
+
+        try (
+                ModelData modelData = ModelData.fromOnnxFile(path);
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, dims)
+                        .addOutputName("output");
+                VariableProfileTable vpt = vptBuilder.build(modelData);
+                ModelBuilder modelBuilder = Model.builder(vpt)
+        ) {
+            modelBuilder.attachExternalBuffer("input", new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f});
+
+            MenohException e = assertThrows(
+                    MenohException.class, () -> modelBuilder.build(modelData, backendName, backendConfig));
+            assertAll("backendName is invalid",
+                    () -> assertEquals(ErrorCode.UNSUPPORTED_INPUT_DIMS, e.getErrorCode()),
+                    () -> assertEquals(
+                            String.format("menoh unsupported input dims error: input has dims size: " +
+                                    "%d (unsupported_input_dims)", dims.length),
+                            e.getMessage())
+            );
+        }
+    }
+
+    @Test
     public void buildAndRunModelWithoutAttachingInput() throws Exception {
         // [[0, 0], [0, 1], [1, 0], [1, 1]] -> [[0], [0], [0], [1]]
         final String path = getResourceFilePath("models/and_op.onnx");

@@ -56,26 +56,16 @@ public class ModelData implements AutoCloseable {
     }
 
     /**
-     * <p>Loads an ONNX model from the specified file.</p>
+     * <p>Loads an ONNX model from the specified byte array.</p>
      */
-    public static ModelData fromOnnxFile(String onnxModelPath) throws MenohException {
-        final PointerByReference handle = new PointerByReference();
-        checkError(MenohNative.INSTANCE.menoh_make_model_data_from_onnx(onnxModelPath, handle));
-
-        return new ModelData(handle.getValue(), null);
+    public static ModelData fromOnnx(byte[] data) throws MenohException {
+        return fromOnnx(data, 0, data.length);
     }
 
     /**
      * <p>Loads an ONNX model from the specified byte array.</p>
      */
-    public static ModelData fromOnnxData(byte[] data) throws MenohException {
-        return fromOnnxData(data, 0, data.length);
-    }
-
-    /**
-     * <p>Loads an ONNX model from the specified byte array.</p>
-     */
-    public static ModelData fromOnnxData(byte[] data, int offset, int size) throws MenohException {
+    public static ModelData fromOnnx(byte[] data, int offset, int size) throws MenohException {
         final DisposableMemory dataPtr = BufferUtils.copyToNativeMemory(data, offset, size);
         final PointerByReference handle = new PointerByReference();
         checkError(
@@ -92,7 +82,7 @@ public class ModelData implements AutoCloseable {
      * Otherwise, it copies the content to a newly allocated buffer in the native heap ranging from
      * <code>position()</code> to <code>(limit() - 1)</code> without changing its position.</p>
      */
-    public static ModelData fromOnnxData(ByteBuffer data) throws MenohException {
+    public static ModelData fromOnnx(ByteBuffer data) throws MenohException {
         if (data == null || data.remaining() <= 0) {
             throw new IllegalArgumentException("data must not be null or empty");
         }
@@ -111,5 +101,15 @@ public class ModelData implements AutoCloseable {
 
             return new ModelData(handle.getValue(), dataPtr); // free the allocated memory after finished
         }
+    }
+
+    /**
+     * <p>Loads an ONNX model from the specified file.</p>
+     */
+    public static ModelData fromOnnxFile(String onnxModelPath) throws MenohException {
+        final PointerByReference handle = new PointerByReference();
+        checkError(MenohNative.INSTANCE.menoh_make_model_data_from_onnx(onnxModelPath, handle));
+
+        return new ModelData(handle.getValue(), null);
     }
 }
