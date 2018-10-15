@@ -226,6 +226,34 @@ public class ModelTest {
     }
 
     @Test
+    public void buildModelIfExternalBufferAlreadyExist() throws Exception {
+        final String path = getResourceFilePath("models/and_op.onnx");
+        final int[] dims = {4, 2};
+        final String backendName = "mkldnn";
+        final String backendConfig = "";
+
+        try (
+                ModelData modelData = ModelData.fromOnnxFile(path);
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, dims)
+                        .addOutputName("output");
+                VariableProfileTable vpt = vptBuilder.build(modelData);
+                ModelBuilder modelBuilder = Model.builder(vpt)
+        ) {
+            MenohException e = assertThrows(MenohException.class, () -> modelBuilder
+                    .attachExternalBuffer("input", new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f})
+                    .attachExternalBuffer("input", new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f}));
+            assertAll("backendName is invalid",
+                    () -> assertEquals(ErrorCode.SAME_NAMED_VARIABLE_ALREADY_EXIST, e.getErrorCode()),
+                    () -> assertEquals(
+                            String.format("menoh same named variable already exist: "
+                                    + "%s (same_named_variable_already_exist)", "input"),
+                            e.getMessage())
+            );
+        }
+    }
+
+    @Test
     public void buildModelIfUnsupportedInputDims() throws Exception {
         final String path = getResourceFilePath("models/and_op.onnx");
         final int[] dims = {4, 2, 1, 1, 1}; // test case (length == 5 is not supported in mkldnn backend)

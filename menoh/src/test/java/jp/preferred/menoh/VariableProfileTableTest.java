@@ -227,4 +227,24 @@ public class VariableProfileTableTest {
             );
         }
     }
+
+    @Test
+    public void buildVariableProfileTableIfOutputProfileNameAlreadyExist() throws Exception {
+        final String outputProfileName = "output"; // test case
+
+        try (
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+        ) {
+            MenohException e = assertThrows(MenohException.class, () -> vptBuilder
+                    .addOutputName(outputProfileName)
+                    .addOutputName(outputProfileName)); // test case
+            assertAll("output profile name not found",
+                    () -> assertEquals(ErrorCode.SAME_NAMED_VARIABLE_ALREADY_EXIST, e.getErrorCode()),
+                    () -> assertEquals(
+                            String.format("menoh same named variable already exist: %s "
+                                    + "(same_named_variable_already_exist)", outputProfileName),
+                            e.getMessage())
+            );
+        }
+    }
 }
