@@ -36,7 +36,74 @@ public class ModelRunner implements AutoCloseable {
     }
 
     /**
-     * Loads an ONNX model from the specified file.
+     * <p>Loads an ONNX model from the specified byte array.</p>
+     */
+    public static ModelRunnerBuilder fromOnnx(byte[] data) {
+        return fromOnnx(data, 0, data.length);
+    }
+
+    /**
+     * <p>Loads an ONNX model from the specified byte array.</p>
+     */
+    public static ModelRunnerBuilder fromOnnx(byte[] data, int offset, int size) {
+        ModelData modelData = null;
+        VariableProfileTableBuilder vptBuilder = null;
+        try {
+            modelData = ModelData.fromOnnx(data, offset, size);
+            vptBuilder = VariableProfileTable.builder();
+
+            return new ModelRunnerBuilder(
+                    modelData,
+                    vptBuilder,
+                    DEFAULT_BACKEND_NAME,
+                    DEFAULT_BACKEND_CONFIG,
+                    new HashMap<String, ByteBuffer>());
+        } catch (Throwable t) {
+            if (modelData != null) {
+                modelData.close();
+            }
+            if (vptBuilder != null) {
+                vptBuilder.close();
+            }
+
+            throw t;
+        }
+    }
+
+    /**
+     * <p>Loads an ONNX model from the specified byte buffer.</p>
+     *
+     * <p>If the specified <code>buffer</code> is direct, it will be directly used without copying.
+     * Otherwise, it copies the content to a newly allocated buffer in the native heap ranging from
+     * <code>position()</code> to <code>(limit() - 1)</code> without changing its position.</p>
+     */
+    public static ModelRunnerBuilder fromOnnx(ByteBuffer data) {
+        ModelData modelData = null;
+        VariableProfileTableBuilder vptBuilder = null;
+        try {
+            modelData = ModelData.fromOnnx(data);
+            vptBuilder = VariableProfileTable.builder();
+
+            return new ModelRunnerBuilder(
+                    modelData,
+                    vptBuilder,
+                    DEFAULT_BACKEND_NAME,
+                    DEFAULT_BACKEND_CONFIG,
+                    new HashMap<String, ByteBuffer>());
+        } catch (Throwable t) {
+            if (modelData != null) {
+                modelData.close();
+            }
+            if (vptBuilder != null) {
+                vptBuilder.close();
+            }
+
+            throw t;
+        }
+    }
+
+    /**
+     * <p>Loads an ONNX model from the specified file.</p>
      */
     public static ModelRunnerBuilder fromOnnxFile(String path) {
         ModelData modelData = null;

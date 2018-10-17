@@ -1,5 +1,6 @@
 package jp.preferred.menoh;
 
+import static jp.preferred.menoh.BufferUtils.convertToNativeMemory;
 import static jp.preferred.menoh.BufferUtils.copyToNativeMemory;
 import static jp.preferred.menoh.MenohException.checkError;
 
@@ -63,14 +64,30 @@ public class ModelBuilder implements AutoCloseable {
      * <p>Note that the <code>order()</code> of the buffer should be {@link ByteOrder#nativeOrder()} because
      * the native byte order of your platform may differ from JVM.</p>
      *
+     * @deprecated This API is not useful at this point in Java. Use {@link Model#variable(String)} instead.
+     * We will redesign it in the future.
+     *
      * @param variableName the name of the variable
      * @param buffer the byte buffer from which to copy
      * @return this object
      *
      * @throws IllegalArgumentException if <code>buffer</code> is null or empty
      */
+    @Deprecated
     public ModelBuilder attachExternalBuffer(String variableName, ByteBuffer buffer) throws MenohException {
-        final Pointer bufferHandle = copyToNativeMemory(buffer);
+        if (buffer == null || buffer.remaining() <= 0) {
+            throw new IllegalArgumentException("data must not be null or empty");
+        }
+
+        final Pointer bufferHandle;
+        if (buffer.isDirect()) {
+            bufferHandle = convertToNativeMemory(buffer);
+        } else {
+            // TODO: free the allocated memory explicitly after all models and its builder is closed
+            // (JVM will invoke Memory#dispose() after bufferHandle is GCed)
+            bufferHandle = copyToNativeMemory(buffer);
+        }
+
         synchronized (this) {
             externalBuffers.add(bufferHandle);
         }
@@ -84,12 +101,16 @@ public class ModelBuilder implements AutoCloseable {
      *
      * <p>The buffer can be accessed through {@link Model#variable(String)}.</p>
      *
+     * @deprecated This API is not useful at this point in Java. Use {@link Model#variable(String)} instead.
+     * We will redesign it in the future.
+     *
      * @param variableName the name of the variable
      * @param values the byte buffer from which to copy
      * @return this object
      *
      * @throws IllegalArgumentException if <code>values</code> is null or empty
      */
+    @Deprecated
     public ModelBuilder attachExternalBuffer(String variableName, float[] values) throws MenohException {
         return attachExternalBuffer(variableName, values, 0, values.length);
     }
@@ -101,6 +122,9 @@ public class ModelBuilder implements AutoCloseable {
      *
      * <p>The buffer can be accessed through {@link Model#variable(String)}.</p>
      *
+     * @deprecated This API is not useful at this point in Java. Use {@link Model#variable(String)} instead.
+     * We will redesign it in the future.
+     *
      * @param variableName the name of the variable
      * @param values the byte buffer from which to copy
      * @param offset the array index from which to start copying
@@ -109,6 +133,7 @@ public class ModelBuilder implements AutoCloseable {
      *
      * @throws IllegalArgumentException if <code>values</code> is null or empty
      */
+    @Deprecated
     public ModelBuilder attachExternalBuffer(
             String variableName, float[] values, int offset, int length) throws MenohException {
         final Pointer bufferHandle = copyToNativeMemory(values, offset, length);

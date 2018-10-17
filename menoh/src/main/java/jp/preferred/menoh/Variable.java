@@ -3,6 +3,7 @@ package jp.preferred.menoh;
 import com.sun.jna.Pointer;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * An input or output variable in the model.
@@ -37,8 +38,30 @@ public class Variable {
     }
 
     /**
-     * A direct {@link ByteBuffer} which points to the native buffer of the variable. The buffer can be read
-     * and written via the methods of <code>ByteBuffer</code> before and after running the model.
+     * <p>A direct {@link ByteBuffer} which points to the native buffer of the variable. The buffer can be read
+     * and written via the methods of <code>ByteBuffer</code> before and after running the model.</p>
+     *
+     * <p>Note that the <code>order()</code> of the buffer is {@link ByteOrder#nativeOrder()} which may differ
+     * from JVM.</p>
+     *
+     * <p>e.g.:</p>
+     * <pre>
+     * {@code
+     * final ModelRunner runner = ...;
+     * final ByteBuffer data = ...;
+     *
+     * final Variable input1 = runner.variable("input1");
+     * final ByteBuffer buf = input1.buffer();
+     * buf.clear();
+     * buf.put(data.duplicate()).rewind();
+     *
+     * runner.run();
+     *
+     * final Variable output1 = runner.variable("output1");
+     * final ByteBuffer ret = output1.buffer();
+     * ...
+     * }
+     * </pre>
      */
     public ByteBuffer buffer() throws MenohException {
         return this.bufferHandle.getByteBuffer(0, bufferLength());

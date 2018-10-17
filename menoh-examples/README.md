@@ -10,6 +10,8 @@ The examples requires the native Menoh Core library in the JNA search path. See 
 Classify an input image by using VGG16, a pre-trained CNN model. See the [Menoh tutorial](https://pfnet-research.github.io/menoh/md_tutorial.html) for the details.
 
 ```bash
+$ https://github.com/pfnet-research/menoh-java.git
+$ git checkout refs/tags/v0.1.0
 $ cd menoh-examples
 $ mvn compile
 $ mkdir data

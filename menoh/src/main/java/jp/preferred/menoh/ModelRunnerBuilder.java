@@ -84,12 +84,25 @@ public class ModelRunnerBuilder implements AutoCloseable {
     }
 
     /**
-     * Adds an output profile to configure the specified variable in the model.
+     * Adds an output name to configure the specified variable in the model.
      *
      * @return this object
      */
+    public ModelRunnerBuilder addOutputName(String name) {
+        vptBuilder.addOutputName(name);
+        return this;
+    }
+
+    /**
+     * Adds an output profile to configure the specified variable in the model.
+     *
+     * @deprecated Use {@link #addOutputName(String)} instead
+     *
+     * @return this object
+     */
+    @Deprecated
     public ModelRunnerBuilder addOutputProfile(String name, DType dtype) {
-        vptBuilder.addOutputProfile(name, dtype);
+        vptBuilder.addOutputName(name);
         return this;
     }
 
@@ -105,12 +118,16 @@ public class ModelRunnerBuilder implements AutoCloseable {
      * <p>Note that the <code>order()</code> of the buffer should be {@link ByteOrder#nativeOrder()} because
      * the native byte order of your platform may differ from JVM.</p>
      *
+     * @deprecated This API is not useful at this point in Java. Use {@link ModelRunner#variable(String)} instead.
+     * We will redesign it in the future.
+     *
      * @param variableName the name of the variable
      * @param buffer the byte buffer from which to copy
      * @return this object
      *
      * @throws IllegalArgumentException if <code>buffer</code> is null or empty
      */
+    @Deprecated
     public ModelRunnerBuilder attachExternalBuffer(String variableName, ByteBuffer buffer) throws MenohException {
         externalBuffers.put(variableName, buffer);
         return this;
@@ -122,12 +139,16 @@ public class ModelRunnerBuilder implements AutoCloseable {
 
      * <p>The buffer can be accessed through {@link Model#variable(String)}.</p>
      *
+     * @deprecated This API is not useful at this point in Java. Use {@link ModelRunner#variable(String)} instead.
+     * We will redesign it in the future.
+     *
      * @param variableName the name of the variable
      * @param values the byte buffer from which to copy
      * @return this object
      *
      * @throws IllegalArgumentException if <code>values</code> is null or empty
      */
+    @Deprecated
     public ModelRunnerBuilder attachExternalBuffer(String variableName, float[] values) throws MenohException {
         return attachExternalBuffer(variableName, values, 0, values.length);
     }
@@ -139,6 +160,9 @@ public class ModelRunnerBuilder implements AutoCloseable {
      *
      * <p>The buffer can be accessed through {@link Model#variable(String)}.</p>
      *
+     * @deprecated This API is not useful at this point in Java. Use {@link ModelRunner#variable(String)} instead.
+     * We will redesign it in the future.
+     *
      * @param variableName the name of the variable
      * @param values the byte buffer from which to copy
      * @param offset the array index from which to start copying
@@ -147,6 +171,7 @@ public class ModelRunnerBuilder implements AutoCloseable {
      *
      * @throws IllegalArgumentException if <code>values</code> is null or empty
      */
+    @Deprecated
     public ModelRunnerBuilder attachExternalBuffer(
             String variableName,
             float[] values,
@@ -166,6 +191,7 @@ public class ModelRunnerBuilder implements AutoCloseable {
      * <p>Menoh will allocate a new buffer for input and output variables to which an external buffer is not
      * attached. It can be accessed via {@link Model#variable(String)} in the <code>ModelRunner</code> object.</p>
      */
+    @SuppressWarnings("deprecation")
     public ModelRunner build() {
         try (
                 VariableProfileTable vpt = vptBuilder.build(modelData);

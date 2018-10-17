@@ -14,6 +14,8 @@ interface MenohNative extends Library {
 
     int menoh_make_model_data_from_onnx(String onnx_filename, PointerByReference dst_handle);
 
+    int menoh_make_model_data_from_onnx_data_on_memory(Pointer onnx_data, int size, PointerByReference dst_handle);
+
     void menoh_delete_model_data(Pointer model_data);
 
     int menoh_model_data_optimize(Pointer model_data, Pointer variable_profile_table);
@@ -22,10 +24,17 @@ interface MenohNative extends Library {
 
     void menoh_delete_variable_profile_table_builder(Pointer builder);
 
+    int menoh_variable_profile_table_builder_add_input_profile(Pointer builder, String name, int dtype, int dims_size, Pointer dims);
+
+    @Deprecated
     int menoh_variable_profile_table_builder_add_input_profile_dims_2(Pointer builder, String name, int dtype, int num, int size);
 
+    @Deprecated
     int menoh_variable_profile_table_builder_add_input_profile_dims_4(Pointer builder, String name, int dtype, int num, int channel, int height, int width);
 
+    int menoh_variable_profile_table_builder_add_output_name(Pointer builder, String name);
+
+    @Deprecated
     int menoh_variable_profile_table_builder_add_output_profile(Pointer builder, String name, int dtype);
 
     int menoh_build_variable_profile_table(Pointer builder, Pointer model_data, PointerByReference dst_handle);

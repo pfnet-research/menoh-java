@@ -25,7 +25,7 @@ Using Maven:
 ```
 
 ### Install native libraries
-menoh-java requires [Menoh Core](https://github.com/pfnet-research/menoh/) and its dependent native shared libraries to maximize the utilization of hardware resources. You need to [install](https://github.com/pfnet-research/menoh/blob/master/README.md#installation-using-package-manager-or-binary-packages) them to the JVM classpath or the system library path before running.
+menoh-java requires [Menoh Core](https://github.com/pfnet-research/menoh/) 1.1.1 or later and its dependent native shared libraries to maximize the utilization of hardware resources. You need to [install](https://github.com/pfnet-research/menoh/blob/master/README.md#installation-using-package-manager-or-binary-packages) them to the JVM classpath or the system library path before running.
 
 ## Examples
 Please see [menoh-examples](menoh-examples) directory in this repository.
@@ -50,8 +50,8 @@ try (
         // Define input profile (name, dtype, dims) and output profile (name, dtype)
         // Menoh calculates dims of outputs automatically at build time
         .addInputProfile(conv11InName, DType.FLOAT, new int[] {batchSize, channelNum, height, width})
-        .addOutputProfile(fc6OutName, DType.FLOAT)
-        .addOutputProfile(softmaxOutName, DType.FLOAT)
+        .addOutputName(fc6OutName)
+        .addOutputName(softmaxOutName)
 
         // Configure backend
         .backendName("mkldnn")

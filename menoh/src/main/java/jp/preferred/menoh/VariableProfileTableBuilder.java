@@ -1,5 +1,6 @@
 package jp.preferred.menoh;
 
+import static jp.preferred.menoh.BufferUtils.copyToNativeMemory;
 import static jp.preferred.menoh.MenohException.checkError;
 
 import com.sun.jna.Pointer;
@@ -33,24 +34,31 @@ public class VariableProfileTableBuilder implements AutoCloseable {
     }
 
     /**
-     * Adds an input profile to configure the specified variable in the model.
+     * <p>Adds an input profile to configure the specified variable in the model.</p>
+     *
+     * <p>Note that some backends only accept the specified length of <code>shape</code>. In this case,
+     * <code>ModelBuilder#build()</code> or <code>ModelRunnerBuilder#build()</code> will throw
+     * <code>MenohException</code> with <code>UNSUPPORTED_INPUT_DIMS</code> error code.</p>
      *
      * @return this object
      */
     public VariableProfileTableBuilder addInputProfile(String name, DType dtype, int[] dims) throws MenohException {
-        if (dims.length == 2) {
+        try (final DisposableMemory dimsPtr = copyToNativeMemory(dims, 0, dims.length)) {
             checkError(
-                    MenohNative.INSTANCE.menoh_variable_profile_table_builder_add_input_profile_dims_2(
-                            handle, name, dtype.getId(), dims[0], dims[1]));
-        } else if (dims.length == 4) {
-            checkError(
-                    MenohNative.INSTANCE.menoh_variable_profile_table_builder_add_input_profile_dims_4(
-                            handle, name, dtype.getId(), dims[0], dims[1], dims[2], dims[3]));
-        } else {
-            throw new MenohException(
-                    ErrorCode.UNDEFINED,
-                    String.format("%s has an invalid dims size: %d (it must be 2 or 4)", name, dims.length));
+                    MenohNative.INSTANCE.menoh_variable_profile_table_builder_add_input_profile(
+                            handle, name, dtype.getId(), dims.length, dimsPtr.share(0, dims.length)));
         }
+
+        return this;
+    }
+
+    /**
+     * <p>Adds an output name to configure the specified variable in the model.</p>
+     *
+     * @return this object
+     */
+    public VariableProfileTableBuilder addOutputName(String name) throws MenohException {
+        checkError(MenohNative.INSTANCE.menoh_variable_profile_table_builder_add_output_name(handle, name));
 
         return this;
     }
@@ -58,13 +66,13 @@ public class VariableProfileTableBuilder implements AutoCloseable {
     /**
      * Adds an output profile to configure the specified variable in the model.
      *
+     * @deprecated Use {@link #addOutputName(String)} instead
+     *
      * @return this object
      */
-    public VariableProfileTableBuilder addOutputProfile(String name, DType dtype) throws MenohException {
-        checkError(MenohNative.INSTANCE.menoh_variable_profile_table_builder_add_output_profile(
-                handle, name, dtype.getId()));
-
-        return this;
+    @Deprecated
+    public VariableProfileTableBuilder addOutputProfile(String name, DType dtyp) throws MenohException {
+        return addOutputName(name);
     }
 
     /**

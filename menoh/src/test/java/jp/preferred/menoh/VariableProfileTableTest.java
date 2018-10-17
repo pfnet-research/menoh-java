@@ -23,30 +23,23 @@ public class VariableProfileTableTest {
     }
 
     @Test
-    public void addValidInputProfile() {
+    public void addValidInputProfileDims2() {
         try (VariableProfileTableBuilder builder = VariableProfileTable.builder()) {
             builder.addInputProfile("foo", DType.FLOAT, new int[] {1, 1});
         }
     }
 
     @Test
-    public void addValidInputProfileWithInvalidDims() {
+    public void addValidInputProfileDims5() {
         try (VariableProfileTableBuilder builder = VariableProfileTable.builder()) {
-            MenohException e = assertThrows(MenohException.class,
-                    // test case: dims.length == 1
-                    () -> builder.addInputProfile("foo", DType.FLOAT, new int[] {1, 1, 1, 1, 1}));
-            assertAll("invalid dim size",
-                    () -> assertEquals(ErrorCode.UNDEFINED, e.getErrorCode()),
-                    () -> assertTrue(e.getMessage().startsWith("foo has an invalid dims size: 5"),
-                            String.format("%s doesn't start with \"foo has an invalid dims size: 5\"",
-                                    e.getMessage())));
+            builder.addInputProfile("foo", DType.FLOAT, new int[] {1, 1, 1, 1, 1});
         }
     }
 
     @Test
     public void addValidOutputProfile() {
         try (VariableProfileTableBuilder builder = VariableProfileTable.builder()) {
-            builder.addOutputProfile("foo", DType.FLOAT);
+            builder.addOutputName("foo");
         }
     }
 
@@ -61,7 +54,7 @@ public class VariableProfileTableTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData)
         ) {
             assertNotNull(vpt.nativeHandle());
@@ -91,7 +84,7 @@ public class VariableProfileTableTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData)
         ) {
             assertNotNull(vpt.nativeHandle());
@@ -120,7 +113,7 @@ public class VariableProfileTableTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT)
+                        .addOutputName("output")
         ) {
             final VariableProfileTable vpt = vptBuilder.build(modelData);
             try {
@@ -136,26 +129,48 @@ public class VariableProfileTableTest {
     }
 
     @Test
-    public void buildVariableProfileTableIfInputProfileNameNotFound() throws Exception {
+    public void buildVariableProfileTableIfVariableNotFound() throws Exception {
         final String path = getResourceFilePath("models/and_op.onnx");
-        final int batchSize = 1;
-        final int inputDim = 2;
-        final String inputProfileName = "__non_existent_variable__"; // test case
         final String inputVariableNameInModel = "input";
         final String outputProfileName = "output";
 
         try (
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
-                        .addInputProfile(inputProfileName, DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile(outputProfileName, DType.FLOAT)
+                        // test case (no addInputProfile for "input" variable)
+                        .addOutputName(outputProfileName)
         ) {
             MenohException e = assertThrows(MenohException.class, () -> vptBuilder.build(modelData));
             assertAll("input profile name not found",
                     () -> assertEquals(ErrorCode.VARIABLE_NOT_FOUND, e.getErrorCode()),
                     () -> assertEquals(
                             String.format("menoh variable not found error: %s (variable_not_found)",
-                                    inputVariableNameInModel), // not `inputProfileName`
+                                    inputVariableNameInModel),
+                            e.getMessage())
+            );
+        }
+    }
+
+    @Test
+    public void buildVariableProfileTableIfInputProfileNameNotFound() throws Exception {
+        final String path = getResourceFilePath("models/and_op.onnx");
+        final int batchSize = 1;
+        final int inputDim = 2;
+        final String inputProfileName = "__non_existent_variable__"; // test case
+        final String outputProfileName = "output";
+
+        try (
+                ModelData modelData = ModelData.fromOnnxFile(path);
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile(inputProfileName, DType.FLOAT, new int[] {batchSize, inputDim})
+                        .addOutputName(outputProfileName)
+        ) {
+            MenohException e = assertThrows(MenohException.class, () -> vptBuilder.build(modelData));
+            assertAll("input profile name not found",
+                    () -> assertEquals(ErrorCode.INPUT_NOT_FOUND_ERROR, e.getErrorCode()),
+                    () -> assertEquals(
+                            String.format("menoh input not found error: %s (input_not_found_error)",
+                                    inputProfileName),
                             e.getMessage())
             );
         }
@@ -173,16 +188,15 @@ public class VariableProfileTableTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile(inputProfileName, DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile(outputProfileName, DType.FLOAT)
+                        .addOutputName(outputProfileName)
         ) {
             MenohException e = assertThrows(MenohException.class, () -> vptBuilder.build(modelData));
             assertAll("mismatched input dims",
                     () -> assertEquals(ErrorCode.DIMENSION_MISMATCH, e.getErrorCode()),
                     () -> assertEquals(
                             String.format(
-                                    "menoh dimension mismatch error: Gemm issuing \"%s\": input[1] and weight[1] "
-                                            + "actual value: %d valid value: %d (dimension_mismatch)",
-                                    "140211424823896", // the name of output[0] in Gemm layer
+                                    "menoh dimension mismatch error: Gemm issuing \"input\": trans(A)[1] and "
+                                            + "trans(B)[0]) actual value: %d valid value: %d (dimension_mismatch)",
                                     3, 2),
                             e.getMessage())
             );
@@ -201,13 +215,34 @@ public class VariableProfileTableTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile(inputProfileName, DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile(outputProfileName, DType.FLOAT)
+                        .addOutputName(outputProfileName)
         ) {
             MenohException e = assertThrows(MenohException.class, () -> vptBuilder.build(modelData));
             assertAll("output profile name not found",
-                    () -> assertEquals(ErrorCode.VARIABLE_NOT_FOUND, e.getErrorCode()),
+                    () -> assertEquals(ErrorCode.OUTPUT_NOT_FOUND_ERROR, e.getErrorCode()),
                     () -> assertEquals(
-                            String.format("menoh variable not found error: %s (variable_not_found)", outputProfileName),
+                            String.format("menoh output not found error: %s (output_not_found_error)",
+                                    outputProfileName),
+                            e.getMessage())
+            );
+        }
+    }
+
+    @Test
+    public void buildVariableProfileTableIfOutputProfileNameAlreadyExist() throws Exception {
+        final String outputProfileName = "output"; // test case
+
+        try (
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+        ) {
+            MenohException e = assertThrows(MenohException.class, () -> vptBuilder
+                    .addOutputName(outputProfileName)
+                    .addOutputName(outputProfileName)); // test case
+            assertAll("output profile name not found",
+                    () -> assertEquals(ErrorCode.SAME_NAMED_VARIABLE_ALREADY_EXIST, e.getErrorCode()),
+                    () -> assertEquals(
+                            String.format("menoh same named variable already exist: %s "
+                                    + "(same_named_variable_already_exist)", outputProfileName),
                             e.getMessage())
             );
         }

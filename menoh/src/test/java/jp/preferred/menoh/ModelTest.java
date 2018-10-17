@@ -22,7 +22,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
@@ -48,7 +48,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData)
         ) {
             final ModelBuilder modelBuilder = Model.builder(vpt);
@@ -88,7 +88,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
@@ -119,7 +119,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
@@ -166,7 +166,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData)
         ) {
             try (ModelBuilder modelBuilder = Model.builder(vpt)) {
@@ -208,7 +208,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder = Model.builder(vpt)
         ) {
@@ -220,6 +220,63 @@ public class ModelTest {
                     () -> assertEquals(ErrorCode.INVALID_BACKEND_NAME, e.getErrorCode()),
                     () -> assertEquals(
                             String.format("menoh invalid backend name error: %s (invalid_backend_name)", backendName),
+                            e.getMessage())
+            );
+        }
+    }
+
+    @Test
+    public void buildModelIfExternalBufferAlreadyExist() throws Exception {
+        final String path = getResourceFilePath("models/and_op.onnx");
+        final int[] dims = {4, 2};
+        final String backendName = "mkldnn";
+        final String backendConfig = "";
+
+        try (
+                ModelData modelData = ModelData.fromOnnxFile(path);
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, dims)
+                        .addOutputName("output");
+                VariableProfileTable vpt = vptBuilder.build(modelData);
+                ModelBuilder modelBuilder = Model.builder(vpt)
+        ) {
+            MenohException e = assertThrows(MenohException.class, () -> modelBuilder
+                    .attachExternalBuffer("input", new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f})
+                    .attachExternalBuffer("input", new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f}));
+            assertAll("backendName is invalid",
+                    () -> assertEquals(ErrorCode.SAME_NAMED_VARIABLE_ALREADY_EXIST, e.getErrorCode()),
+                    () -> assertEquals(
+                            String.format("menoh same named variable already exist: "
+                                    + "%s (same_named_variable_already_exist)", "input"),
+                            e.getMessage())
+            );
+        }
+    }
+
+    @Test
+    public void buildModelIfUnsupportedInputDims() throws Exception {
+        final String path = getResourceFilePath("models/and_op.onnx");
+        final int[] dims = {4, 2, 1, 1, 1}; // test case (length == 5 is not supported in mkldnn backend)
+        final String backendName = "mkldnn";
+        final String backendConfig = "";
+
+        try (
+                ModelData modelData = ModelData.fromOnnxFile(path);
+                VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
+                        .addInputProfile("input", DType.FLOAT, dims)
+                        .addOutputName("output");
+                VariableProfileTable vpt = vptBuilder.build(modelData);
+                ModelBuilder modelBuilder = Model.builder(vpt)
+        ) {
+            modelBuilder.attachExternalBuffer("input", new float[] {0f, 0f, 0f, 1f, 1f, 0f, 1f, 1f});
+
+            MenohException e = assertThrows(
+                    MenohException.class, () -> modelBuilder.build(modelData, backendName, backendConfig));
+            assertAll("backendName is invalid",
+                    () -> assertEquals(ErrorCode.UNSUPPORTED_INPUT_DIMS, e.getErrorCode()),
+                    () -> assertEquals(
+                            String.format("menoh unsupported input dims error: input has dims size: "
+                                    + "%d (unsupported_input_dims)", dims.length),
                             e.getMessage())
             );
         }
@@ -241,7 +298,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder = Model.builder(vpt); // test case
                 Model model = modelBuilder.build(modelData, "mkldnn", "")
@@ -302,7 +359,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder =
                         Model.builder(vpt).attachExternalBuffer("input", inputDataBuf);
@@ -365,7 +422,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder =
                         Model.builder(vpt).attachExternalBuffer("input", inputDataBuf);
@@ -415,7 +472,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder =
                         Model.builder(vpt).attachExternalBuffer("input", readOnlyInputDataBuf);
@@ -461,7 +518,7 @@ public class ModelTest {
                 ModelData modelData = ModelData.fromOnnxFile(path);
                 VariableProfileTableBuilder vptBuilder = VariableProfileTable.builder()
                         .addInputProfile("input", DType.FLOAT, new int[] {batchSize, inputDim})
-                        .addOutputProfile("output", DType.FLOAT);
+                        .addOutputName("output");
                 VariableProfileTable vpt = vptBuilder.build(modelData);
                 ModelBuilder modelBuilder =
                         Model.builder(vpt).attachExternalBuffer("input", inputData);

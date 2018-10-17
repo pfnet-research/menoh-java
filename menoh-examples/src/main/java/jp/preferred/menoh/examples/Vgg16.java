@@ -65,8 +65,8 @@ public class Vgg16 {
                         // Define input profile (name, dtype, dims) and output profile (name, dtype)
                         // Menoh calculates dims of outputs automatically at build time
                         .addInputProfile(conv11InName, DType.FLOAT, new int[] {batchSize, channelNum, height, width})
-                        .addOutputProfile(fc6OutName, DType.FLOAT)
-                        .addOutputProfile(softmaxOutName, DType.FLOAT)
+                        .addOutputName(fc6OutName)
+                        .addOutputName(softmaxOutName)
 
                         // Configure backend
                         .backendName("mkldnn")
